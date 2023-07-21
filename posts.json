@@ -1,0 +1,114 @@
+[
+  {
+    "title": "</> htmx ~ The client-side-templates Extension",
+    "link": "https://htmx.org/extensions/client-side-templates/",
+    "tags": "htmx, webdev",
+    "message": "Using templates with htmx requires the client-side-templates extension, and the template engine to be loaded in a `<script>` tag.\n\nexample htmx using templates.\n\n``` html\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width\">\n  <title>JS Bin</title>\n  <script src=\"https://unpkg.com/htmx.org\"></script>\n  <script src=\"https://unpkg.com/htmx.org/dist/ext/client-side-templates.js\"></script>\n  <script src=\"https://unpkg.com/mustache@latest\"></script>\n</head>\n<body>\n  <div hx-ext=\"client-side-templates\">\n    <button hx-get=\"https://jsonplaceholder.typicode.com/todos/1\"\n            hx-swap=\"innerHTML\"\n            hx-target=\"#content\"\n            mustache-template=\"foo\">\n      Click Me\n    </button>\n\n    <p id=\"content\">Start</p>\n\n    <template id=\"foo\">\n      <p> {% raw %}{{userID}}{% endraw %} and {% raw %}{{id}}{% endraw %} and {% raw %}{{title}}{% endraw %} and {% raw %}{{completed}}{% endraw %}</p>\n    </template>\n  </div>\n</body>\n</html>\n```",
+    "id": 24
+  },
+  {
+    "title": "(106) Python Sucks And I LOVE It | Prime Reacts - YouTube",
+    "link": "https://www.youtube.com/watch?v=8D7FZoQ-z20&t=97",
+    "tags": "python",
+    "message": "Prime reviews an article with some hot takes about python being slow and quirky, but good enough for a lot of things.  Especially data applications that have libraries written in C.",
+    "id": 16
+  },
+  {
+    "title": "Changelog on Twitter: \"🗣️ @kelseyhightower on his demos: That happy path gets people out of their chairs. They’re going back to the computer, like: “Yo, I’m gonna try it right now.” Come on… I’d rather have that. And I’ll take the bit of criticism that comes with it. https://t.co/m9r2KZjNQO\" / Twitter",
+    "link": "https://twitter.com/changelog/status/1681306857951084544",
+    "tags": "soft, presentation",
+    "message": "Such an inspiring clip from Kelsey Heightower.  Make good shit that inspires people rather than fake ppts of how things _could_ be.",
+    "id": 15
+  },
+  {
+    "title": "Chris Coyier on Twitter: \"I was unaware of `text-wrap: pretty;` I knew about the (new/cool) `text-wrap: balance;` — but sometimes that's a bit... too much. I feel like it's nice on headers but not smaller type. Here's what I mean.\" / Twitter",
+    "link": "https://twitter.com/chriscoyier/status/1681407724993798144",
+    "tags": "webdev, css",
+    "message": "\nNext time I'm working with large headers on small screens I need to try this.  I always truggle to get them to look good for most text and overflow ridiculously long words correctly or at all.\n\n\n``` css\ntext-wrap: pretty;\ntext-wrap: balance\n```",
+    "id": 14
+  },
+  {
+    "title": "Full-text search - Datasette documentation",
+    "link": "https://docs.datasette.io/en/latest/full_text_search.html#enabling-full-text-search-for-a-sqlite-table",
+    "tags": "sqlite, data, database",
+    "message": "Enable full-text search in sqlite using sqlite-utils.\n\n``` bash\n$ sqlite-utils enable-fts mydatabase.db items name description\n```",
+    "id": 13
+  },
+  {
+    "title": "sqlite-utils command-line tool - sqlite-utils",
+    "link": "https://sqlite-utils.datasette.io/en/stable/cli.html#querying-data-directly-using-an-in-memory-database",
+    "tags": "sqlite, data, database, sql, json",
+    "message": "I want to like jq, but I think Simon is selling me on sqlite, maybe its just me but this looks readable, hackable, editable, memorizable.  Everytime I try jq, and its 5 minutes fussing with it just to get the most basic thing to work.  I know enough sql out of the gate to make this work off the top of my head\n\n\n``` bash\ncurl  https://thoughts.waylonwalker.com/posts/ | sqlite-utils memory - 'select title, message from stdin where stdin.tags like \"%python%\"' | jq\n```\n\n",
+    "id": 12
+  },
+  {
+    "title": "sqlite-utils command-line tool - sqlite-utils",
+    "link": "https://sqlite-utils.datasette.io/en/stable/cli.html#inserting-json-data",
+    "tags": "sqlite, data, database",
+    "message": "insert a json array directly into into sqlite with sqlite-utils.\n\n``` bash\necho '{\"name\": \"Cleo\", \"age\": 4}' | sqlite-utils insert dogs.db dogs -\n```\n\n",
+    "id": 11
+  },
+  {
+    "title": "jq Cheat Sheet",
+    "link": "https://lzone.de/cheat-sheet/jq",
+    "tags": "jq, ijq, json",
+    "message": "A nice cheat sheet for jq. jq looks so nice, but it so quickly gets overwhelming on how to select what you want.  I was able to make a jq contains query.\n\n``` bash\ncurl  https://thoughts.waylonwalker.com/posts/ | jq '.[] | select(.title | contains(\"python\"))'\n```",
+    "id": 10
+  },
+  {
+    "title": "How to Manage 'Systemd' Services and Units Using 'Systemctl' in Linux",
+    "link": "https://www.tecmint.com/manage-services-using-systemd-and-systemctl-in-linux/",
+    "tags": "linux, systemd",
+    "message": "A fantastic overview of the systemd cli.",
+    "id": 9
+  },
+  {
+    "title": "How to fix ZFS pool not importing at boot :: ./techtipsy — Herman's blog",
+    "link": "https://ounapuu.ee/posts/2021/02/01/how-to-fix-zfs-pool-not-importing-at-boot/",
+    "tags": "linux, zfs, systemd",
+    "message": "Hacky solution to get `zpool import tank` to work on boot right away.  This has been an issue that has plagued my system for months and no matter what dependencies I add in it never works, but adding a sleep as ExecStartPre did the trick.",
+    "id": 8
+  },
+  {
+    "title": "Flask Trailing Slashes 404",
+    "link": "https://stackoverflow.com/questions/33241050/trailing-slash-triggers-404-in-flask-path-rule",
+    "tags": "python, web, flask",
+    "message": "In flask apps I often get a 404 for routes with a trailing slash.  This Stack Overflow post shows how to configure flask to allow trailing slashes on some or all routes.",
+    "id": 7
+  },
+  {
+    "title": "Deleting Specific Lines in a File with sed or yq",
+    "link": "https://nickjanetakis.com/blog/deleting-specific-lines-in-a-file-with-sed-or-yq",
+    "tags": "linux, bash, cli",
+    "message": "sed can be a tricky beast, I often stumble when trying to pipe into it.  Next time I need to use sed, I should reference this article by Nick Janetakis.  He makes it looks much easier than my experience has been, and it appears to behave like a vim `:%s/` substitution does, or a `g/` g command.",
+    "id": 6
+  },
+  {
+    "title": "Dear Red Hat... featuring Jeff Geerling (Changelog & Friends #7) |> Changelog",
+    "link": "https://changelog.com/friends/7",
+    "tags": "",
+    "message": "Loved this explanation about all the recent lock down with RHEL from Jeff Geerling.",
+    "id": 5
+  },
+  {
+    "title": "How to pull from images from docker.io with podman",
+    "link": "https://gist.github.com/isomorphisms/3114ab86960656a729a6b4653001aae2",
+    "tags": "docker, podman, linux",
+    "message": "By default podman will not pull images from docker.io and will need setup.  This guide worked for me.",
+    "id": 4
+  },
+  {
+    "title": "python script is not found",
+    "link": "None",
+    "tags": "python",
+    "message": "When setting up a new machine, vm, docker image you might be installing command line tools from places like pip.  They will often put executables in your `~/.local/bin` directory, but by default your shell is not looking in that directory for commands.\n\n``` bash\n  WARNING: The script dotenv is installed in '/home/falcon/.local/bin' which is not on PATH.\n  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.\n```\n\nTo solve this you need to add that directory to your $PATH.\n\n\n``` bash\nexport PATH=$PATH:~/.local/bin\n```\n\nTo make this change permanant add this line to your shell's init script, which is likely something like `~/.bashrc` or `~/.zshrc`.",
+    "id": 3
+  },
+  {
+    "title": "LazyVim Installation",
+    "link": "https://www.lazyvim.org/installation",
+    "tags": "vim, linux",
+    "message": "Lately in 2023 I have been leaning on lazyvim for my new setups where I am not necessarily ready to drop my full config.  It's been pretty solid, and comes with a very nice setup out of the box, the docs are pretty fantastic as well.",
+    "id": 2
+  }
+]
