@@ -1,5 +1,54 @@
 [
   {
+    "title": "Dark Form",
+    "link": "https://codepen.io/Godex/pen/DLgQbg",
+    "tags": "webdev, css",
+    "message": "A nice codepen reference for dark forms.   I am using it for my thoughts chrome extension.",
+    "id": 31
+  },
+  {
+    "title": "string",
+    "link": "string",
+    "tags": "string",
+    "message": "string",
+    "id": 30
+  },
+  {
+    "title": "doyensec/wsrepl: WebSocket REPL for pentesters",
+    "link": "https://github.com/doyensec/wsrepl",
+    "tags": "python, websockets, textual",
+    "message": "Very inspiring textual project to check out how they set up the ui.  Their intro video has a pretty epic dev experience.",
+    "id": 29
+  },
+  {
+    "title": "(1) Doyensec on Twitter: \"Announcing wsrepl, the WebSocket testing tool from Doyensec! This intuitive tool is super easy to use and makes automation around WebSockets simple! Check out our blog for the details and download it today! https://t.co/km5m7k6Pb0 #doyensec #appsec #websockets #burpsuite https://t.co/UVLymuSk95\" / Twitter",
+    "link": "https://twitter.com/Doyensec/status/1681320727465672706",
+    "tags": "python, websockets, textual",
+    "message": "wsrepl is an epic websocket repl built in python on the textual framework.",
+    "id": 28
+  },
+  {
+    "title": "Filter Data - WHERE - SQLModel",
+    "link": "https://sqlmodel.tiangolo.com/tutorial/where/#filter-rows-using-where-with-sqlmodel",
+    "tags": "python, fastapi, sqlmodel, select, where",
+    "message": "When fetching pydantic models from the database with sqlmodel, and you cannot select your item by id, you probably need to use a where clause.  This is the sqlmodel way of doing it.\n\n> Here is a snippet of how I am using sqlmodel select and where to find a post by link in my thoughts database.\n\n``` python\n@post_router.get(\"/link/\")\nasync def get_post_by_link(\n    *,\n    session: Session = Depends(get_session),\n    link: str,\n) -> PostRead:\n    \"get one post by link\"\n    link = urllib.parse.unquote(link)\n    print(f'link: {link}')\n    post = session.exec(select(Post).where(Post.link==link)).first()\n    if not post:\n        raise HTTPException(status_code=404, detail=f\"Post not found for link: {link}\")\n\n    return post\n```",
+    "id": 27
+  },
+  {
+    "title": "URL Decoding query strings or form parameters in Python | URLDecoder",
+    "link": "https://www.urldecoder.io/python/",
+    "tags": "python, urlib, fastapi",
+    "message": "In order to turn url encoded links back into links that I would find in the database of my thoughts project I need to urldecode them when they hit the api.  When anything hits the api it must urlencode the links in order for them to be sent correctly as data and not get parsed as part of the url.\n\n\n> Here is a snippet of how I am using urlib.parse.unquote to un-encode encoded urls so that I can fetch posts from the database.\n\n``` python\n@post_router.get(\"/link/\")\nasync def get_post_by_link(\n    *,\n    session: Session = Depends(get_session),\n    link: str,\n) -> PostRead:\n    \"get one post by link\"\n    link = urllib.parse.unquote(link)\n    print(f'link: {link}')\n    post = session.exec(select(Post).where(Post.link==link)).first()\n    if not post:\n        raise HTTPException(status_code=404, detail=f\"Post not found for link: {link}\")\n\n    return post\n```",
+    "id": 26
+  },
+  {
+    "title": "encodeURIComponent() - JavaScript | MDN",
+    "link": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent",
+    "tags": "javascript, webdev",
+    "message": "In order to send data that includes special characters such as `/` in a url you need to url encode it.  You have probably seen these many times in urls with things like %20 for spaces.\n\nI'm working on a chrome extension to make quick blog posts, like thoughts or a persistent bookmark tool with comments.  The backend is written in fastapi and when I check to see if I have a post for a page I need to url encode it.\n\n``` bash\ncurl -X 'GET' \\\n  'https://thoughts.waylonwalker.com/link/?link=https%3A%2F%2Fhtmx.org%2Fextensions%2Fclient-side-templates%2F' \\\n  -H 'accept: application/json'\n```\n\n> curl example generated from the fastapi swagger docs.\n\nHere is how I used javascript's `encodeURIComponent` to turn my chrome extension into a notification when I already have a post for the current page.\n\n``` js\n// Event listener for tab changes\nchrome.tabs.onActivated.addListener(function (activeInfo) {\n  // Get the active tab information\n  chrome.tabs.get(activeInfo.tabId, function (tab) {\n    const url = tab.url || \"\";\n\n    getData(`https://thoughts.waylonwalker.com/link/?link=${encodeURIComponent(url)}`).then((data) => {\n        console.log('link data: ', data);\n      if (data.hasOwnProperty('detail')) {\n        chrome.browserAction.setBadgeText({ text: \"\" });\n      } else {\n        localStorageKey = `formData-${url}`;\n        chrome.browserAction.setBadgeText({ text: \"1\" });\n        chrome.browserAction.setBadgeBackgroundColor({ color: \"#80A3D5\" });\n        localStorage.setItem(localStorageKey, JSON.stringify(data));\n      }\n    });\n  });\n});\n```\n",
+    "id": 25
+  },
+  {
     "title": "</> htmx ~ The client-side-templates Extension",
     "link": "https://htmx.org/extensions/client-side-templates/",
     "tags": "htmx, webdev",
