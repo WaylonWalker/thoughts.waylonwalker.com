@@ -1,0 +1,9 @@
+        <li id="post-{{ post.id }}">
+            <h2>{{ post.title }}</h2>
+            <p><a href="{{ post.link }}">{{ post.link }}</a></p>
+            <p>{{ post.message }}</p>
+            <div class='flex center'>
+            <button hx-delete="{{ config.root }}/post/{{ post.id }}"  hx-target="#post-{{ post.id }}">Delete</button>
+            <button hx-get="{{ config.root }}/edit-thought/{{ post.id }}"  hx-target="#post-{{ post.id }}">Edit</button>
+            </div>
+        </li>

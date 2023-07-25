@@ -15,6 +15,7 @@ class PostBase(SQLModel, table=False):
     link: str
     tags: Optional[Union[str, List[str]]] = Field(sa_column=Column(JSON))
     message: Optional[str]
+    published: bool = Field(default=True)
 
 class Post(PostBase, table=True):
     id: int = Field(default=None, primary_key=True)

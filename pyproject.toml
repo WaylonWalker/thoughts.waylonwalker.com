@@ -24,18 +24,19 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
+  "alembic",
+  "anyconfig",
+  "fastapi",
+  "jinja2",
+  "passlib[bcrypt]",
+  "pydantic",
+  "python-jose",
+  "python-multipart",
   "rich",
+  "sqlmodel",
   "textual",
   "typer",
-  "anyconfig",
-  "sqlmodel",
-  "pydantic",
-  "fastapi",
-  'uvicorn',
-  "alembic",
-  "python-multipart",
-  "python-jose",
-  "passlib[bcrypt]"
+  "uvicorn",
 ]
 dynamic = ["version"]
 

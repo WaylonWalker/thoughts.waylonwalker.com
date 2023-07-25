@@ -1,0 +1,144 @@
+body {
+  background-color: #25262c;
+  color: white;
+  width: 800px;
+  margin: 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  font-family: Arial, sans-serif;
+}
+form {
+    margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+    box-shadow: 0px 10px 25px 9px rgba(0,0,0,0.1),0px 10px 73px 14px rgba(0,0,0,0.1),-19px 20px 58px 10px rgba(0,0,0,0.1);
+}
+form.login {
+    width: 300px;
+    padding: 2rem;
+    margin: auto;
+}
+input,
+textarea {
+  margin-bottom: 10px;
+}
+button,
+input[type="submit"] {
+  width: 100px;
+  display: block;
+  width: 150px;
+  margin: 0 0 20px;
+  padding: 8px 0 10px 0;
+  text-align: center;
+  border: 1px solid rgba(0,0,0,.5);
+  background: rgba(0,0,0,.25);
+  margin: 1rem;
+}
+#websiteForm {
+  padding: 2rem;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+#message {
+  height: 200px;
+  width: 275px;
+}
+
+.CodeMirror {
+  width: 290px;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+  border: 0;
+  outline: 0;
+  color: #fff;
+}
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+input {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+#password,
+input[type="text"] {
+  display: block;
+  margin: 0 0 20px;
+  padding: 8px 12px 10px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+textarea {
+  display: block;
+  height: 300px;
+  margin: 0 0 20px;
+  padding: 8px 12px 10px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.25);
+}
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+#error {
+  position: fixed;
+  top: 0;
+  margin: 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid black;
+  padding: 0.2rem 1rem;
+  text-align: center;
+  color: #e7afaf;
+  background: rgb(76 23 23);
+  display: none;
+}
+a {
+  color: #82d9d9;
+}
+
+ul#posts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+}
+
+ul#posts li{
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 0.5rem;
+  border: 1px solid black;
+  padding: 0.5rem;
+  margin: 0.5rem;
+  width: 100%;
+  width: -webkit-fill-available;
+}
+.flex{
+    display: flex;
+}
+
+.space-around{
+    justify-content: space-around;
+}
+.center{
+    align-items: center;
+    justify-content: center;
+}

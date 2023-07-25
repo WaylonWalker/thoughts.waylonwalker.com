@@ -1,0 +1,17 @@
+        <h1>New Thought</h1>
+        <form id="websiteForm" hx-post="{{ config.root }}/post/html/" method="POST" name="newPost" hx-target="#posts" hx-swap="afterbegin">
+            <p>Author: {{ current_user.username }}</p>
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required>
+            
+            <label for="link">Link:</label>
+            <input type="text" id="link" name="link" value="">
+            
+            <label for="tags">Tags:</label>
+            <input type="text" id="tags" name="tags" required>
+            
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="4" required></textarea>
+            
+            <input type="submit" value="Submit" id="submit">
+        </form>
