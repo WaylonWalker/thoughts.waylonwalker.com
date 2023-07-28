@@ -4,7 +4,7 @@ from typing import Annotated
 
 from fastapi.responses import RedirectResponse
 from fastapi.responses import HTMLResponse
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form, Header
 import starlette
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -16,6 +16,7 @@ from fastapi import  Request
 from fastapi.templating import Jinja2Templates
 
 from thoughts.config import config
+
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -150,6 +151,7 @@ async def get_current_active_user(
 async def try_get_current_active_user(
         # token: Annotated[str | None, Depends(oauth2_scheme)],
         request: Request,
+        is_hx_request: Annotated[str | None, Header()] = None,
         # session: Annotated[str | None, Depends(cookie_sec)],
         # token, session
     ):
@@ -167,6 +169,7 @@ async def try_get_current_active_user(
     print('try_get_current_active_user')
     print(f'token: {token}')
     print(f'session: {session}')
+    print(f'is_hx_request: {is_hx_request}')
 
     if token is None and session is None:
         print('user not logged in')
@@ -182,9 +185,12 @@ async def try_get_current_active_user(
 
 @user_router.post("/token", response_model=Token)
 async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+    # form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+    username: Annotated[str, Form()],
+    password: Annotated[str, Form()],
 ):
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    print('here')
+    user = authenticate_user(fake_users_db, username, password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -197,21 +203,17 @@ async def login_for_access_token(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-html = f'''
-    <div id="loginwrapper">
-        <h1>login</h1>
-        <form class='login' /hx-post="{ config.root }/login/" hx-target="#loginwrapper" method="POST" name="login">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password">
-            <input type="submit" value="Login">
-        </form>
-    </div>
-'''
 @user_router.get("/login")
-async def get_login():
-    return HTMLResponse(html)
+async def get_login( 
+        request: Request,
+        is_hx_request: Annotated[str | None, Header()] = None,
+    ):
+    if is_hx_request:
+        print('hx')
+        return templates.TemplateResponse("login_form.html", {'request': request})
+    print('not hx')
+    return templates.TemplateResponse("login.html", {'request': request})
+    
 
 logouthtml = '''
 <h1>goodbye</h1>
@@ -225,38 +227,38 @@ async def get_logout():
     response.delete_cookie("session")
     return response
 
-htmluser = f'''
-<!DOCTYPE html>
-    <head>
-        <title>thoughts login</title>
-    </head>
-    <body>
-        <div hx-get='{ config.root }/users/me/new-thought/' hx-trigger='load'>
-        Welcome {'{{ user }}'}
-        </div>
-        <div id="user" data-token="{'{{ token }}'}"></div>
-    </body>
-</html>
-'''
-@user_router.post("/login")
-async def post_login(
-    response: Response,
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-        ):
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    response = HTMLResponse(content=htmluser.replace('{{ user }}', user.username).replace('{{ token }}', access_token))
-    response.set_cookie('session', access_token)
-    return response
+# htmluser = f'''
+# <!DOCTYPE html>
+#     <head>
+#         <title>thoughts login</title>
+#     </head>
+#     <body>
+#         <div hx-get='{ config.root }/users/me/new-thought/' hx-trigger='load'>
+#         Welcome {'{{ user }}'}
+#         </div>
+#         <div id="user" data-token="{'{{ token }}'}"></div>
+#     </body>
+# </html>
+# '''
+# @user_router.post("/login")
+# async def post_login(
+#     response: Response,
+#     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+#         ):
+#     user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+#     if not user:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Incorrect username or password",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+#     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+#     access_token = create_access_token(
+#         data={"sub": user.username}, expires_delta=access_token_expires
+#     )
+#     response = HTMLResponse(content=htmluser.replace('{{ user }}', user.username).replace('{{ token }}', access_token))
+#     response.set_cookie('session', access_token)
+#     return response
 
 @user_router.get("/users/me/", response_model=User)
 async def read_users_me(
@@ -269,9 +271,13 @@ async def read_users_me(
 @user_router.get("/users/me/new-thought/", response_class=HTMLResponse)
 async def get_new_thought(
     request: Request,
-    current_user: Annotated[User, Depends(try_get_current_active_user)]
+    current_user: Annotated[User, Depends(try_get_current_active_user)],
+    hx_request: Annotated[str | None, Header()] = None,
 ):
+    print('getting_new_thought, hx_request: ', hx_request)
     if isinstance(current_user, RedirectResponse):
+        if hx_request:
+            return templates.TemplateResponse("login_form.html", {'request': request})
         return current_user
     return templates.TemplateResponse("new_thought.html", {"request": request, "config": config, "current_user": current_user })
 

@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 import urllib.parse
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlmodel import Session, select
-from fastapi import Request
+from fastapi import Request, Header
 from fastapi.templating import Jinja2Templates
 
 from thoughts.config import get_session
@@ -53,34 +53,38 @@ async def get_post_by_link(
 
 @post_router.post("/post/")
 async def post_post(
-    post: Annotated[PostCreate, Form()],
+    request: Request,
+    post: PostCreate,
     current_user: Annotated[User, Depends(try_get_current_active_user)],
     session: Session = Depends(get_session),
+    is_hx_request: Annotated[str | None, Header()] = None,
 ) -> PostRead:
     "create a post"
     db_post = Post.from_orm(post)
     session.add(db_post)
     session.commit()
     session.refresh(db_post)
+    if is_hx_request:
+        return templates.TemplateResponse("post_item.html", {"request": request, "config": config, "post": db_post})
     return db_post
 
-@post_router.post("/post/html/", response_class=HTMLResponse)
-async def post_post(
-    request: Request,
-    title: Annotated[str, Form()],
-    link: Annotated[str, Form()],
-    tags: Annotated[str, Form()],
-    message: Annotated[str, Form()],
-    current_user: Annotated[User, Depends(try_get_current_active_user)],
-    session: Session = Depends(get_session),
-) -> PostRead:
-    "create a post"
-    post = PostCreate(title=title, link=link, tags=tags, message=message)
-    db_post = Post.from_orm(post)
-    session.add(db_post)
-    session.commit()
-    session.refresh(db_post)
-    return templates.TemplateResponse("post_item.html", {"request": request, "config": config, "post": db_post})
+# @post_router.post("/post/html/", response_class=HTMLResponse)
+# async def post_post(
+#     request: Request,
+#     title: Annotated[str, Form()],
+#     link: Annotated[str, Form()],
+#     tags: Annotated[str, Form()],
+#     message: Annotated[str, Form()],
+#     current_user: Annotated[User, Depends(try_get_current_active_user)],
+#     session: Session = Depends(get_session),
+# ) -> PostRead:
+#     "create a post"
+#     post = PostCreate(title=title, link=link, tags=tags, message=message)
+#     db_post = Post.from_orm(post)
+#     session.add(db_post)
+#     session.commit()
+#     session.refresh(db_post)
+#     return templates.TemplateResponse("post_item.html", {"request": request, "config": config, "post": db_post})
 
 @post_router.get("/edit-thought/{post_id}", response_class=HTMLResponse)
 async def edit_thought(

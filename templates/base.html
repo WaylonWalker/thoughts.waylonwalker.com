@@ -5,25 +5,17 @@
         <title>{% block title %}{% endblock %}</title>
         <link rel="stylesheet" href="/static/main.css">
         <script src="https://unpkg.com/htmx.org@1.9.3"></script>
+        <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
         {% endblock %}
     </head>
     <body>
     {% block header %}
     {% endblock %}
     {% block content %}
-    <div id="loginwrapper">
-        <h1>login</h1>
-        <form id="login" /hx-post="{ config.root }/login/" hx-target="#loginwrapper" method="POST" name="login">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password">
-            <input type="submit" value="Login">
-        </form>
     {% endblock %}
     <footer>
     {% block footer %}
-    &copy; Copyright 2010 by <a href="http://domain.invalid/">you</a>. 
+    &copy; Copyright 2010 by <a href="http://waylonwalker.com">waylonwalker</a>. 
     {% endblock %}
     </footer>
     </div>
