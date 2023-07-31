@@ -1,5 +1,14 @@
+{% if page == 1 %}
 <ul id='posts'>
-    {% for post in posts.__root__ %}
+{% endif %}
+    {% for post in posts.__root__[:-1] %}
     {% include 'post_item.html' %}
     {% endfor %}
+    <div hx-get="{{ config.root }}/posts/?page={{ page + 1 }}" hx-target="#posts" hx-swap="beforeend" hx-trigger='revealed'></div>
+    {% for post in posts.__root__[-1:] %}
+    {% include 'post_item.html' %}
+    {% endfor %}
+
+{% if page == 1 %}
 </ul>
+{% endif %}

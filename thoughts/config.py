@@ -33,7 +33,7 @@ class Config(BaseSettings):
         if 'FLY_MACHINE_ID' in os.environ:
             return "https://thoughts.waylonwalker.com"
         else:
-            return ''
+            return 'http://localhost:5000'
 
 class Database:
     def __init__(self, config: "Config" = None) -> None:

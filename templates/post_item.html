@@ -1,9 +1,14 @@
         <li id="post-{{ post.id }}">
-            <h2>{{ post.title }}</h2>
+            <div class='post-header'>
+                <h2>{{ post.title }}</h2>
+            <p>{{ post.hr_date }}</p>
+            </div>
             <p><a href="{{ post.link }}">{{ post.link }}</a></p>
-            <p>{{ post.message }}</p>
+            {{ md.render(post.message) | safe }}
             <div class='flex center'>
+            {% if is_logged_in %}
             <button hx-delete="{{ config.root }}/post/{{ post.id }}"  hx-target="#post-{{ post.id }}">Delete</button>
             <button hx-get="{{ config.root }}/edit-thought/{{ post.id }}"  hx-target="#post-{{ post.id }}">Edit</button>
+            {% endif %}
             </div>
         </li>

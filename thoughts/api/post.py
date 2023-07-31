@@ -11,9 +11,89 @@ from thoughts.config import get_session
 from thoughts.models.post import Post, PostCreate, PostRead, PostUpdate, Posts
 from thoughts.api.user import try_get_current_active_user, User
 from thoughts.config import config
+from markdown_it import MarkdownIt
+
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import ClassNotFound, get_lexer_by_name
+
+COPY_ICON = '<img src="static/copy.svg" alt="Copy to clipboard">'
+HELP_ICON = '<svg height="92px" id="Capa_1" style="enable-background:new 0 0 91.999 92;" version="1.1" viewBox="0 0 91.999 92" width="91.999px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M45.385,0.004C19.982,0.344-0.334,21.215,0.004,46.619c0.34,25.393,21.209,45.715,46.611,45.377  c25.398-0.342,45.718-21.213,45.38-46.615C91.655,19.986,70.785-0.335,45.385,0.004z M45.249,74l-0.254-0.004  c-3.912-0.116-6.67-2.998-6.559-6.852c0.109-3.788,2.934-6.538,6.717-6.538l0.227,0.004c4.021,0.119,6.748,2.972,6.635,6.937  C51.903,71.346,49.122,74,45.249,74z M61.704,41.341c-0.92,1.307-2.943,2.93-5.492,4.916l-2.807,1.938  c-1.541,1.198-2.471,2.325-2.82,3.434c-0.275,0.873-0.41,1.104-0.434,2.88l-0.004,0.451H39.429l0.031-0.907  c0.131-3.728,0.223-5.921,1.768-7.733c2.424-2.846,7.771-6.289,7.998-6.435c0.766-0.577,1.412-1.234,1.893-1.936  c1.125-1.551,1.623-2.772,1.623-3.972c0-1.665-0.494-3.205-1.471-4.576c-0.939-1.323-2.723-1.993-5.303-1.993  c-2.559,0-4.311,0.812-5.359,2.478c-1.078,1.713-1.623,3.512-1.623,5.35v0.457H27.935l0.02-0.477  c0.285-6.769,2.701-11.643,7.178-14.487C37.946,18.918,41.446,18,45.53,18c5.346,0,9.859,1.299,13.412,3.861  c3.6,2.596,5.426,6.484,5.426,11.556C64.368,36.254,63.472,38.919,61.704,41.341z"/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/></svg>'
+
+
+from markdown_it import MarkdownIt
+
+md = MarkdownIt(
+    "commonmark",
+    {
+        "html": True,
+        "typographer": True,
+    },
+)
+
+def highlight_code(code, name, attrs, markata=None):
+    """Code highlighter for markdown-it-py."""
+
+    try:
+        lexer = get_lexer_by_name(name or "text")
+    except ClassNotFound:
+        lexer = get_lexer_by_name("text")
+
+    import re
+
+    pattern = r'(\w+)\s*=\s*(".*?"|\S+)'
+    matches = re.findall(pattern, attrs)
+    attrs = dict(matches)
+
+    if attrs.get("hl_lines"):
+        formatter = HtmlFormatter(hl_lines=attrs.get("hl_lines"))
+    else:
+        formatter = HtmlFormatter()
+
+    copy_button = f"""<button class='copy' title='copy code to clipboard' onclick="navigator.clipboard.writeText(this.parentElement.parentElement.querySelector('pre').textContent)">{COPY_ICON}</button>"""
+
+
+    if attrs.get("help"):
+        help = f"""
+        <a href={attrs.get('help').strip('<').strip('>').strip('"').strip("'")} title='help link' class='help'>{HELP_ICON}</a>
+        """
+    else:
+        help = ""
+    if attrs.get("title"):
+        file = f"""
+<div class='filepath'>
+{md.render(attrs.get('title').strip('"').strip("'"))}
+<div class='right'>
+{help}
+{copy_button}
+</div>
+</div>
+"""
+    else:
+        file = f"""
+<div class='copy-wrapper'>
+{help}
+{copy_button}
+</div>
+        """
+    return f"""<pre class='wrapper'>
+{file}
+{highlight(code, lexer, formatter)}
+</pre>
+"""
+
 
 post_router = APIRouter()
 templates = Jinja2Templates(directory="templates")
+md = MarkdownIt(
+    "gfm-like",
+    {
+        "linkify": True,
+        "html": True,
+        "typographer": True,
+        "highlight": highlight_code,
+    },
+)
 
 
 @post_router.on_event("startup")
@@ -33,7 +113,9 @@ async def get_post(
     post = session.get(Post, post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    return templates.TemplateResponse("post_item.html", {"request": request, "config": config, "post": post})
+    return templates.TemplateResponse(
+        "post_item.html", {"request": request, "config": config, "post": post, "md": md},
+    )
 
 
 @post_router.get("/link/")
@@ -44,7 +126,7 @@ async def get_post_by_link(
 ) -> PostRead:
     "get one post by link"
     link = urllib.parse.unquote(link)
-    post = session.exec(select(Post).where(Post.link==link)).first()
+    post = session.exec(select(Post).where(Post.link == link)).first()
     if not post:
         raise HTTPException(status_code=404, detail=f"Post not found for link: {link}")
 
@@ -57,16 +139,20 @@ async def post_post(
     post: PostCreate,
     current_user: Annotated[User, Depends(try_get_current_active_user)],
     session: Session = Depends(get_session),
-    is_hx_request: Annotated[str | None, Header()] = None,
+    hx_request: Annotated[str | None, Header()] = None,
 ) -> PostRead:
     "create a post"
     db_post = Post.from_orm(post)
     session.add(db_post)
     session.commit()
     session.refresh(db_post)
-    if is_hx_request:
-        return templates.TemplateResponse("post_item.html", {"request": request, "config": config, "post": db_post})
+    if hx_request:
+        return templates.TemplateResponse(
+            "post_item.html",
+            {"request": request, "config": config, "post": db_post, "md": md},
+        )
     return db_post
+
 
 # @post_router.post("/post/html/", response_class=HTMLResponse)
 # async def post_post(
@@ -86,21 +172,31 @@ async def post_post(
 #     session.refresh(db_post)
 #     return templates.TemplateResponse("post_item.html", {"request": request, "config": config, "post": db_post})
 
+
 @post_router.get("/edit-thought/{post_id}", response_class=HTMLResponse)
 async def edit_thought(
-        *,
+    *,
     request: Request,
     current_user: Annotated[User, Depends(try_get_current_active_user)],
     post_id: int,
     session: Session = Depends(get_session),
 ):
-    print('here')
+    print("here")
     if isinstance(current_user, RedirectResponse):
         return current_user
     post = session.get(Post, post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    return templates.TemplateResponse("edit_thought.html", {"request": request, "config": config, "current_user": current_user, "post": post, "post_id":post_id})
+    return templates.TemplateResponse(
+        "edit_thought.html",
+        {
+            "request": request,
+            "config": config,
+            "current_user": current_user,
+            "post": post,
+            "post_id": post_id,
+        },
+    )
 
 
 @post_router.patch("/post/")
@@ -119,7 +215,10 @@ async def patch_post(
     session.add(db_post)
     session.commit()
     session.refresh(db_post)
-    return templates.TemplateResponse("post_item.html", {"request": request, "config": config, "post": db_post})
+    return templates.TemplateResponse(
+        "post_item.html", {"request": request, "config": config, "post": db_post}
+    )
+
 
 @post_router.patch("/post/html/", response_class=HTMLResponse)
 async def patch_post(
@@ -141,7 +240,9 @@ async def patch_post(
     session.add(db_post)
     session.commit()
     session.refresh(db_post)
-    return templates.TemplateResponse("post_item.html", {"request": request, "config": config, "post": db_post})
+    return templates.TemplateResponse(
+        "post_item.html", {"request": request, "config": config, "post": db_post}
+    )
 
 
 @post_router.delete("/post/{post_id}", response_class=HTMLResponse)
@@ -167,7 +268,10 @@ async def delete_post(
     session.commit()
     session.refresh(db_post)
 
-    return templates.TemplateResponse("delete_post_item.html", {"request": request, "config": config, "post": db_post})
+    return templates.TemplateResponse(
+        "delete_post_item.html", {"request": request, "config": config, "post": db_post}
+    )
+
 
 @post_router.post("/undo/{post_id}", response_class=HTMLResponse)
 async def undo_delete_post(
@@ -192,32 +296,122 @@ async def undo_delete_post(
     session.commit()
     session.refresh(db_post)
 
-    return templates.TemplateResponse("post_item.html", {"request": request, "config": config, "post": db_post})
+    return templates.TemplateResponse(
+        "post_item.html", {"request": request, "config": config, "post": db_post}
+    )
+
 
 
 
 @post_router.get("/posts/")
 async def get_posts(
     *,
-    session: Session = Depends(get_session),
-) -> Posts:
-    "get all posts"
-    statement = select(Post).where(Post.published)
-    posts = session.exec(statement).all()
-    posts.reverse()
-    return Posts(__root__=posts)
-
-@post_router.get("/posts/html/", response_class=HTMLResponse)
-async def get_posts(
-    *,
     request: Request,
     session: Session = Depends(get_session),
+    hx_request: Annotated[str | None, Header()] = None,
+    accept: Annotated[str | None, Header()] = None,
+    current_user: Annotated[User, Depends(try_get_current_active_user)],
+    page_size: int = 10,
+    page: int = 1,
 ) -> Posts:
     "get all posts"
-    statement = select(Post).where(Post.published)
+    statement = (
+        select(Post)
+        .where(Post.published)
+        .order_by(Post.id.desc())
+        .limit(page_size)
+        .offset((page - 1) * page_size)
+    )
     posts = session.exec(statement).all()
-    if len(posts) == 0:
-        return HTMLResponse('<ul id="posts"><li>No posts</li></ul>')
-    posts.reverse()
     posts = Posts(__root__=posts)
-    return templates.TemplateResponse("posts.html", {"request": request, "config": config, "posts": posts})
+
+    if isinstance(current_user, RedirectResponse):
+        is_logged_in = False
+    else:
+        is_logged_in = True
+
+    if hx_request and page == 1 and len(posts.__root__) == 0:
+        return HTMLResponse('<ul id="posts"><li>No posts</li></ul>')
+    if hx_request and len(posts.__root__) == 0:
+        return HTMLResponse("")
+    if not hx_request and len(posts.__root__) == 0:
+        return ["no posts"]
+    if hx_request:
+        return templates.TemplateResponse(
+            "posts.html",
+            {
+                "request": request,
+                "config": config,
+                "posts": posts,
+                "md": md,
+                "is_logged_in": is_logged_in,
+                "page": page,
+            },
+        )
+
+    if accept.startswith("text/html"):
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "config": config,
+                "posts": posts,
+                "md": md,
+                "is_logged_in": is_logged_in,
+                "page": page,
+            },
+        )
+
+    return posts
+
+from functools import wraps
+def htmx(func):
+    print('here')
+    @wraps(func)
+    async def wrapper(request: Request, *args, **kwargs):
+
+        hx_request_header = request.headers.get("hx-request")
+        user_agent = request.headers.get("user-agent", "").lower()
+        print('hx_request_header', hx_request_header)
+        print('user_agent', user_agent)
+
+
+
+        if hx_request_header:
+            val = await func(request, *args, **kwargs)
+
+            return templates.TemplateResponse(
+            f'{val.__class__.__name__.lower()}_partial.html',
+            {
+                "request": request,
+                "config": config,
+                "md": md,
+                **val.__dict__
+            },
+        )
+        elif "mozilla" in user_agent or "webkit" in user_agent:
+            val = await func(request, *args, **kwargs)
+            return templates.TemplateResponse(
+            f'{val.__class__.__name__.lower()}.html',
+            {
+                "request": request,
+                "config": config,
+                "md": md,
+                **val.__dict__
+            },
+        )
+        return await func(request, *args, **kwargs)
+    return wrapper
+
+from pydantic import BaseModel
+class Test(BaseModel):
+    value: Optional[str] = 'the value'
+    title: Optional[str] = 'the title'
+
+
+@post_router.get("/headers/")
+@htmx
+async def get_headers(request: Request):
+    "get all headers"
+    return Test(value="test")
+    # return str(request.headers)

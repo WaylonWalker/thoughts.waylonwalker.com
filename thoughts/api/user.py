@@ -151,7 +151,7 @@ async def get_current_active_user(
 async def try_get_current_active_user(
         # token: Annotated[str | None, Depends(oauth2_scheme)],
         request: Request,
-        is_hx_request: Annotated[str | None, Header()] = None,
+        hx_request: Annotated[str | None, Header()] = None,
         # session: Annotated[str | None, Depends(cookie_sec)],
         # token, session
     ):
@@ -169,7 +169,7 @@ async def try_get_current_active_user(
     print('try_get_current_active_user')
     print(f'token: {token}')
     print(f'session: {session}')
-    print(f'is_hx_request: {is_hx_request}')
+    print(f'hx_request: {hx_request}')
 
     if token is None and session is None:
         print('user not logged in')
@@ -206,13 +206,13 @@ async def login_for_access_token(
 @user_router.get("/login")
 async def get_login( 
         request: Request,
-        is_hx_request: Annotated[str | None, Header()] = None,
+        hx_request: Annotated[str | None, Header()] = None,
     ):
-    if is_hx_request:
+    if hx_request:
         print('hx')
-        return templates.TemplateResponse("login_form.html", {'request': request})
+        return templates.TemplateResponse("login_form.html", {'request': request, "config": config})
     print('not hx')
-    return templates.TemplateResponse("login.html", {'request': request})
+    return templates.TemplateResponse("login.html", {'request': request, "config": config})
     
 
 logouthtml = '''
@@ -240,25 +240,27 @@ async def get_logout():
 #     </body>
 # </html>
 # '''
-# @user_router.post("/login")
-# async def post_login(
-#     response: Response,
-#     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-#         ):
-#     user = authenticate_user(fake_users_db, form_data.username, form_data.password)
-#     if not user:
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Incorrect username or password",
-#             headers={"WWW-Authenticate": "Bearer"},
-#         )
-#     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-#     access_token = create_access_token(
-#         data={"sub": user.username}, expires_delta=access_token_expires
-#     )
-#     response = HTMLResponse(content=htmluser.replace('{{ user }}', user.username).replace('{{ token }}', access_token))
-#     response.set_cookie('session', access_token)
-#     return response
+@user_router.post("/login")
+async def post_login(
+    request: Request,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+        ):
+    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    # response = HTMLResponse(content=htmluser.replace('{{ user }}', user.username).replace('{{ token }}', access_token))
+    response =  templates.TemplateResponse("hx_get_new_thought.html", {"request": request, "config": config, })
+
+    response.set_cookie('session', access_token)
+    return response
 
 @user_router.get("/users/me/", response_model=User)
 async def read_users_me(
@@ -277,7 +279,7 @@ async def get_new_thought(
     print('getting_new_thought, hx_request: ', hx_request)
     if isinstance(current_user, RedirectResponse):
         if hx_request:
-            return templates.TemplateResponse("login_form.html", {'request': request})
+            return templates.TemplateResponse("login_form.html", {'request': request, "config": config})
         return current_user
     return templates.TemplateResponse("new_thought.html", {"request": request, "config": config, "current_user": current_user })
 

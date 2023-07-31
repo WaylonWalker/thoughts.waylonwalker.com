@@ -1,4 +1,4 @@
-        <h1>Edit Thought</h1>
+        <h2>Edit Thought</h2>
         <form id="websiteForm" hx-patch="{{ config.root }}/post/html/" method="POST" name="newPost" hx-target="#post-{{ post.id }}" hx-swap='outerHTML'>
             <p>Author: {{ current_user.username }}</p>
             <input type="hidden" id="id" name="id" required readonly value="{{ post.id }}">

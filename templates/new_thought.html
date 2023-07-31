@@ -1,4 +1,3 @@
-        <h1>New Thought</h1>
         <form id="websiteForm" hx-post="{{ config.root }}/post/" method="POST" name="newPost" hx-target="#posts" hx-swap="afterbegin" hx-ext='json-enc'>
             <p>Author: {{ current_user.username }}</p>
             <label for="title">Title:</label>

@@ -3,11 +3,12 @@ from typing import Dict, Optional, List, Union
 
 # import httpx
 import pydantic
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlmodel import Field, SQLModel, Column, JSON
 
 # from thoughts.config import config
 from thoughts.optional import optional
+from datetime import datetime
 
 
 class PostBase(SQLModel, table=False):
@@ -16,9 +17,23 @@ class PostBase(SQLModel, table=False):
     tags: Optional[Union[str, List[str]]] = Field(sa_column=Column(JSON))
     message: Optional[str]
     published: bool = Field(default=True)
+    date: datetime = Field(default_factory=datetime.now)
+
+    @property
+    def hr_date(self) -> str:
+        if self.date.year != datetime.now().year:
+            return self.date.year
+        days = (datetime.now() - self.date).days
+        if days == 0:
+            return "Today"
+        elif days == 1:
+            return "Yesterday"
+        else:
+            return f"{days} days ago"
 
 class Post(PostBase, table=True):
     id: int = Field(default=None, primary_key=True)
+
 
 
 class PostCreate(PostBase):
