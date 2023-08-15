@@ -1,0 +1,9 @@
+body {
+    @apply bg-gray-100;
+    @apply text-gray-900;
+}
+
+.mine {
+    @apply bg-red-100;
+    @apply text-red-900;
+}

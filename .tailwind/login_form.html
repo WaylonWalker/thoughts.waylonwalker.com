@@ -1,0 +1,10 @@
+    <div id="loginwrapper">
+        <h1>login</h1>
+        <form class='login' hx-post="http://localhost:5000/login/" hx-target="#loginwrapper" method="POST" name="login">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password">
+            <input type="submit" value="Login">
+        </form>
+    </div>

@@ -1,0 +1,22 @@
+        <h2>Edit Thought</h2>
+        <form id="websiteForm" hx-patch="http://localhost:5000/post/html/" method="POST" name="newPost" hx-target="#post-" hx-swap='outerHTML'>
+            <p>Author: </p>
+            <input type="hidden" id="id" name="id" required readonly value="">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required value="">
+            
+            <label for="link">Link:</label>
+            <input type="text" id="link" name="link" value="">
+            
+            <label for="tags">Tags:</label>
+            <input type="text" id="tags" name="tags" required value="">
+            
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="4" required ></textarea>
+            
+            <div class='flex'>
+            <input type="submit" value="Submit" id="submit">
+            <!-- cancel button -->
+            <button hx-get="http://localhost:5000/post/" hx-swap="outerHTML" hx-target="#post-">Cancel</button>
+            </div>
+        </form>

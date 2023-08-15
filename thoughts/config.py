@@ -3,6 +3,10 @@ from pydantic import BaseSettings, BaseModel, validator
 from pathlib import Path
 from sqlalchemy import create_engine
 from sqlmodel import Session
+from markdown_it import MarkdownIt
+from fastapi.templating import Jinja2Templates
+from thoughts.highlight import highlight_code
+
 
 
 class ApiServer(BaseModel):
@@ -18,6 +22,19 @@ class Config(BaseSettings):
     api_server: ApiServer = ApiServer()
     database_url: str = None
     root: str = None
+    templates = Jinja2Templates(directory="templates")
+
+    @property
+    def md(self):
+        return MarkdownIt(
+    "gfm-like",
+    {
+        "linkify": True,
+        "html": True,
+        "typographer": True,
+        "highlight": highlight_code,
+    },
+)
 
     @validator("database_url")
     def validate_database_url(cls, v):

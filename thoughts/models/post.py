@@ -1,14 +1,11 @@
-
-from typing import Dict, Optional, List, Union
-
-# import httpx
-import pydantic
-from pydantic import BaseModel, Field
-from sqlmodel import Field, SQLModel, Column, JSON
-
-# from thoughts.config import config
-from thoughts.optional import optional
 from datetime import datetime
+from typing import List, Optional, Union
+
+from pydantic import BaseModel
+from sqlmodel import Column, Field, JSON, Relationship, SQLModel
+
+from thoughts.models.user import User, UserBase
+from thoughts.optional import optional
 
 
 class PostBase(SQLModel, table=False):
@@ -17,7 +14,9 @@ class PostBase(SQLModel, table=False):
     tags: Optional[Union[str, List[str]]] = Field(sa_column=Column(JSON))
     message: Optional[str]
     published: bool = Field(default=True)
+    public: bool = Field(default=True)
     date: datetime = Field(default_factory=datetime.now)
+    author_id: int = Field(foreign_key="user.id")
 
     @property
     def hr_date(self) -> str:
@@ -31,74 +30,29 @@ class PostBase(SQLModel, table=False):
         else:
             return f"{days} days ago"
 
+
 class Post(PostBase, table=True):
     id: int = Field(default=None, primary_key=True)
-
+    author: Optional[User] = Relationship(back_populates="posts")
 
 
 class PostCreate(PostBase):
     ...
 
-    # def post(self) -> Post:
-    #     r = httpx.post(
-    #         f"{config.api_client.url}/post/",
-    #         json=self.dict(),
-    #     )
-    #     if r.status_code != 200:
-    #         raise RuntimeError(f"{r.status_code}:\n {r.text}")
-
-    #     return Post.parse_obj(r.json())
-
 
 class PostRead(PostBase):
     id: int
-
-    # @classmethod
-    # def get(
-    #     cls,
-    #     id: int,
-    # ) -> Post:
-    #     r = httpx.get(f"{config.api_client.url}/post/{id}")
-    #     if r.status_code != 200:
-    #         raise RuntimeError(f"{r.status_code}:\n {r.text}")
-    #     return PostRead.parse_obj(r.json())
+    author: UserBase
 
 
 class Posts(BaseModel):
-    __root__: list[Post]
-
-    # @classmethod
-    # def list(
-    #     self,
-    # ) -> Post:
-    #     r = httpx.get(f"{config.api_client.url}/posts/")
-    #     if r.status_code != 200:
-    #         raise RuntimeError(f"{r.status_code}:\n {r.text}")
-    #     return Posts.parse_obj({"__root__": r.json()})
+    __root__: list[PostRead]
 
 
 @optional
 class PostUpdate(PostBase):
     id: int
 
-    # def update(self) -> Post:
-    #     r = httpx.patch(
-    #         f"{config.api_client.url}/post/",
-    #         json=self.dict(exclude_none=True),
-    #     )
-    #     if r.status_code != 200:
-    #         raise RuntimeError(f"{r.status_code}:\n {r.text}")
-    #     return Post.parse_obj(r.json())
-
 
 class PostDelete(BaseModel):
     id: int
-
-#     @classmethod
-#     def delete(self, id: int) -> Dict[str, bool]:
-#         r = httpx.delete(
-#             f"{config.api_client.url}/post/{id}",
-#         )
-#         if r.status_code != 200:
-#             raise RuntimeError(f"{r.status_code}:\n {r.text}")
-#         return {"ok": True}

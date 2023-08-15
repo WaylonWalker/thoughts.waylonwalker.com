@@ -25,7 +25,7 @@ def upgrade() -> None:
     sa.Column('link', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('message', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id', name='post_pkey'),
     )
     # ### end Alembic commands ###
 

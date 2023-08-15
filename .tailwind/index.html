@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        {% block head %}
+        
         <link rel="icon" type="image/x-icon" href="/static/8bitcc.ico">
-        <title>{% block title %}ww thoughts{% endblock %}</title>
+        <title>ww thoughts</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Waylon Walker's Thoughts" />
@@ -11,7 +11,7 @@
         <script src="/static/htmx@1.9.3.min.js"></script>
         <script src="/static/json-enc.js"></script>
 
-        {% block meta %}
+        
         <meta name="og:title" content="ww thoughts">
         <meta name="og:description" content="Waylon Walker's Thoughts">
         <meta name="og:image:alt" content="ww thoughts">
@@ -25,23 +25,24 @@
         <meta name="twitter:title" content="ww thoughts">
         <meta name="twitter:description" content="Waylon Walker's Thoughts">
         <meta name="twitter:image" content="/static/social.png">
-        {% endblock %}
-        {% endblock %}
+        
+        
 
     </head>
     <body class='mx-auto bg-black'>
-    {% block header %}
-    {% endblock %}
-    {% block content %}
-    {% if posts %}
-        {% include 'posts.html' %}
-    {% endif %}
-    {{ content | safe }}
-    {% endblock %}
+    
+    
+    
+        <h1>Waylon Walker's Thoughts</h1>
+        <div hx-get='http://localhost:5000/users/me/new-thought/' hx-trigger='load'>Loading</div>
+        <h2>Thoughts</h2>
+        <div id="posts" hx-get="/posts/" hx-target="#posts" hx-swap="outerHTML" hx-trigger='load'>
+        </div>
+
     <footer>
-    {% block footer %}
-    &copy; Copyright 2023 by <a href="http://waylonwalker.com">waylonwalker</a>.
-    {% endblock %}
+    
+    &copy; Copyright 2010 by <a href="http://waylonwalker.com">waylonwalker</a>. 
+    
     </footer>
     </div>
     </body>

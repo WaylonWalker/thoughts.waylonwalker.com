@@ -1,26 +1,31 @@
 <div id="loginwrapper">
-  <h1>login</h1>
+  <h1>Sign Up</h1>
   <form
     class="login"
-    hx-post="{{ config.root }}/login/"
+    hx-post="{{ config.root }}/signup/"
     hx-target="#loginwrapper"
     method="POST"
     name="login"
   >
+    <label for="full_name">Full Name:</label>
+    <input type="text" id="full_name" name="full_name" />
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" />
+    <label for="email">Email:</label>
+    <input type="text" id="email" name="email" />
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" />
+    <input type="hidden" name="disabled" value="false" />
 
     <div style="display: flex; justify-content: center; margin-top: 20px">
-      <input type="submit" value="Login" />
+      <input type="submit" value="Sign Up" />
       <button
         type="submit"
-        hx-get="{{ config.root }}/signup"
+        hx-get="{{ config.root }}/login"
         hx-target="#loginwrapper"
         value="Sign Up"
       >
-        Sign Up
+        Login
       </button>
     </div>
     {% if error %}
