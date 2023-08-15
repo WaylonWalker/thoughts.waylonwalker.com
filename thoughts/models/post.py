@@ -16,7 +16,6 @@ class PostBase(SQLModel, table=False):
     published: bool = Field(default=True)
     public: bool = Field(default=True)
     date: datetime = Field(default_factory=datetime.now)
-    author_id: int = Field(foreign_key="user.id")
 
     @property
     def hr_date(self) -> str:
@@ -34,10 +33,11 @@ class PostBase(SQLModel, table=False):
 class Post(PostBase, table=True):
     id: int = Field(default=None, primary_key=True)
     author: Optional[User] = Relationship(back_populates="posts")
+    author_id: int = Field(foreign_key="user.id")
 
 
 class PostCreate(PostBase):
-    ...
+    author_id: Optional[int] = Field(foreign_key="user.id")
 
 
 class PostRead(PostBase):

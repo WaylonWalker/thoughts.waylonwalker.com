@@ -11,13 +11,13 @@
     Author: {{ current_user.username }}
     <a href="/logout" title="logout">{% include 'logout.svg' %}</a>
   </p>
-  <input
-    type="hidden"
-    id="author_id"
-    name="author_id"
-    value="{{ current_user.id }}"
-    required
-  />
+  <!-- <input -->
+  <!--   type="hidden" -->
+  <!--   id="author_id" -->
+  <!--   name="author_id" -->
+  <!--   value="{{ current_user.id }}" -->
+  <!--   required -->
+  <!-- /> -->
   <label for="title">Title:</label>
   <input type="text" id="title" name="title" required />
 

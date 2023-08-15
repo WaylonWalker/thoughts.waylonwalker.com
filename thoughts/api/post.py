@@ -87,6 +87,7 @@ async def post_post(
     hx_request: Annotated[str | None, Header()] = None,
 ) -> PostRead:
     "create a post"
+    post.author_id = current_user.id
     db_post = Post.from_orm(post)
     session.add(db_post)
     session.commit()
