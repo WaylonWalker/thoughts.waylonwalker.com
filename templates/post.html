@@ -1,4 +1,7 @@
+{% extends 'base.html' %} {% block title %} {{ post.title }} {% endblock %} {%
+block description %} {{ post.message[0:150] }} {% endblock %} {% block content
+%}
 <ul id="posts">
-  {% extends 'base.html' %} {% block content %} {% include 'post_item.html' %}
-  {% endblock %}
+  {% include 'post_item.html' %}
 </ul>
+{% endblock %}
