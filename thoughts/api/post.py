@@ -87,6 +87,10 @@ async def post_post(
     hx_request: Annotated[str | None, Header()] = None,
 ) -> PostRead:
     "create a post"
+    if isinstance(current_user, RedirectResponse):
+        is_logged_in = False
+    else:
+        is_logged_in = True
     post.author_id = current_user.id
     db_post = Post.from_orm(post)
     session.add(db_post)
@@ -95,7 +99,14 @@ async def post_post(
     if hx_request:
         return config.templates.TemplateResponse(
             "post_item.html",
-            {"request": request, "config": config, "post": db_post, "md": md},
+            {
+                "request": request,
+                "config": config,
+                "post": db_post,
+                "md": md,
+                "is_logged_in": is_logged_in,
+                "current_user": current_user,
+            },
         )
     return db_post
 
