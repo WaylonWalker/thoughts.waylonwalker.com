@@ -1,7 +1,9 @@
 <li id="post-{{ post.id }}" class="bg-slate-800">
   <div class="post-header">
     <p>@{{ post.author.username }}</p>
-    <h2>{{ post.title }}</h2>
+    <a href="/post/{{ post.id}}" title="{{ post.title }}">
+      <h2>{{ post.title }}</h2>
+    </a>
     <p>{{ post.hr_date }}</p>
   </div>
   <p><a href="{{ post.link }}">{{ post.link }}</a></p>

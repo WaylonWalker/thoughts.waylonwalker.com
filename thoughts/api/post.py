@@ -51,7 +51,7 @@ async def get_post(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     return config.templates.TemplateResponse(
-        "post_item.html",
+        "post.html",
         {
             "request": request,
             "config": config,
