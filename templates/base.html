@@ -1,48 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-        {% block head %}
-        <link rel="icon" type="image/x-icon" href="/static/8bitcc.ico">
-        <title>{% block title %}ww thoughts{% endblock %}</title>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="{% block description %}Waylon Walker's Thoughts{% endblock %}" />
-        <link rel="stylesheet" href="/static/main.css">
-        <script src="/static/htmx@1.9.3.min.js"></script>
-        <script src="/static/json-enc.js"></script>
+  <head>
+    {% block head %}
+    <link rel="icon" type="image/x-icon" href="/static/8bitcc.ico" />
+    <title>{% block title %}ww thoughts{% endblock %}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="{% block description %}Waylon Walker's Thoughts{% endblock %}"
+    />
+    <link rel="stylesheet" href="/static/main.css" />
+    <script src="/static/htmx@1.9.3.min.js"></script>
+    <script src="/static/json-enc.js"></script>
 
-        {% block meta %}
-        <meta name="og:title" content="{{ self.title() }}">
-        <meta name="og:description" content="{{ self.description() }}">
-        <meta name="og:image:alt" content="ww thoughts">
-        <meta name="og:image:height" content="640">
-        <meta name="og:image:width" content="1280">
-        <meta name="og:image:type" content="image/png">
-        <meta name="og:image" content="/static/social.png">
-        <meta name="twitter:card" content="summary">
-        <meta name="twitter:site" content="@waylonwalker">
-        <meta name="twitter:creator" content="@waylonwalker">
-        <meta name="twitter:title" content="{{ self.title() }}">
-        <meta name="twitter:description" content="{{ self.description() }}">
-        <meta name="twitter:image" content="/static/social.png">
-        {% endblock %}
-        {% endblock %}
-
-    </head>
-    <body class='mx-auto bg-black'>
-    {% block header %}
-    {% endblock %}
-    {% block content %}
-    {% if posts %}
-        {% include 'posts.html' %}
-    {% endif %}
-    {{ content | safe }}
-    {% endblock %}
+    {% block meta %}
+    <meta name="og:title" content="{{ self.title() }}" />
+    <meta name="og:description" content="{{ self.description() }}" />
+    <meta name="og:image:alt" content="ww thoughts" />
+    <meta name="og:image:height" content="640" />
+    <meta name="og:image:width" content="1280" />
+    <meta name="og:image:type" content="image/png" />
+    <meta name="og:image" content="/static/social.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@waylonwalker" />
+    <meta name="twitter:creator" content="@waylonwalker" />
+    <meta name="twitter:title" content="{{ self.title() }}" />
+    <meta name="twitter:description" content="{{ self.description() }}" />
+    <meta name="twitter:image" content="/static/social.png" />
+    {% endblock %} {% endblock %}
+  </head>
+  <body class="mx-auto bg-black">
+    {% block header %} {% endblock %} {% block content %} {% if posts %} {%
+    include 'posts.html' %} {% endif %} {{ content | safe }} {% endblock %}
     <footer>
-    {% block footer %}
-    &copy; Copyright 2023 by <a href="http://waylonwalker.com">waylonwalker</a>.
-    {% endblock %}
+      {% block footer %} &copy; Copyright 2023 by
+      <a href="http://waylonwalker.com">waylonwalker</a>. {% endblock %}
     </footer>
-    </div>
-    </body>
+  </body>
 </html>
