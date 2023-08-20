@@ -35,11 +35,12 @@
 
 <input class="form-control" type="search"
        name="search"
-       placeholder="Begin Typing To Search Users..."
+       placeholder="Begin Typing To Search Thoughts..."
        hx-post="/search/"
-       hx-trigger="keyup changed throttle:500ms search"
+       hx-trigger="keyup changed throttle:100ms search"
        hx-target="#posts"
        hx-swap='outerHTML'
+       style="margin: auto; display: block; padding: 0.5rem 1rem; width: 50%;"
        >
 
     {% include 'posts.html' %} {% endif %} {{ content | safe }} {% endblock %}
