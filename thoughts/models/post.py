@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional, Union
 
 from pydantic import BaseModel
-from sqlmodel import Column, Field, JSON, Relationship, SQLModel
+from sqlmodel import JSON, Column, Field, Relationship, SQLModel
 
 from thoughts.models.user import User, UserBase
 from thoughts.optional import optional
@@ -42,7 +42,7 @@ class PostCreate(PostBase):
 
 class PostRead(PostBase):
     id: int
-    author: UserBase
+    author: Optional[UserBase]
 
 
 class Posts(BaseModel):

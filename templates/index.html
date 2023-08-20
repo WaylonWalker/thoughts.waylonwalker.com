@@ -1,9 +1,19 @@
 {% extends 'base.html' %} {% block content %}
-<h1>Waylon Walker's Thoughts</h1>
+<h1 style='text-align: center; margin-top: 5rem;'>Waylon Walker's Thoughts</h1>
 <div hx-get="{{ config.root }}/users/me/new-thought/" hx-trigger="load">
   Loading
 </div>
-<h2>Thoughts</h2>
+<h2 style='text-align: center; margin-top: 5rem;'>Thoughts</h2>
+
+<input class="form-control" type="search"
+       name="search"
+       placeholder="Begin Typing To Search Thoughts..."
+       hx-post="/search/"
+       hx-trigger="keyup changed throttle:100ms search"
+       hx-target="#posts"
+       hx-swap='outerHTML'
+       style="margin: auto; display: block; padding: 0.5rem 1rem; width: 50%;"
+       >
 <div
   id="posts"
   hx-get="/posts/"

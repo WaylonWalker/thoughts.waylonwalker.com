@@ -1,16 +1,17 @@
-import urllib.parse
 from typing import Annotated, Optional
+import urllib.parse
 
-from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Header, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from markdown_it import MarkdownIt
 from pydantic import BaseModel
+from sqlite_utils import Database
 from sqlmodel import Session, select
 
 from thoughts.api.user import User, try_get_current_active_user
 from thoughts.config import config, get_session
 from thoughts.htmx import htmx
-from thoughts.models.post import Post, PostCreate, PostRead, Posts, PostUpdate
+from thoughts.models.post import Post, PostCreate, PostRead, PostUpdate, Posts
 
 COPY_ICON = '<img src="static/copy.svg" alt="Copy to clipboard">'
 HELP_ICON = '<svg height="92px" id="Capa_1" style="enable-background:new 0 0 91.999 92;" version="1.1" viewBox="0 0 91.999 92" width="91.999px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M45.385,0.004C19.982,0.344-0.334,21.215,0.004,46.619c0.34,25.393,21.209,45.715,46.611,45.377  c25.398-0.342,45.718-21.213,45.38-46.615C91.655,19.986,70.785-0.335,45.385,0.004z M45.249,74l-0.254-0.004  c-3.912-0.116-6.67-2.998-6.559-6.852c0.109-3.788,2.934-6.538,6.717-6.538l0.227,0.004c4.021,0.119,6.748,2.972,6.635,6.937  C51.903,71.346,49.122,74,45.249,74z M61.704,41.341c-0.92,1.307-2.943,2.93-5.492,4.916l-2.807,1.938  c-1.541,1.198-2.471,2.325-2.82,3.434c-0.275,0.873-0.41,1.104-0.434,2.88l-0.004,0.451H39.429l0.031-0.907  c0.131-3.728,0.223-5.921,1.768-7.733c2.424-2.846,7.771-6.289,7.998-6.435c0.766-0.577,1.412-1.234,1.893-1.936  c1.125-1.551,1.623-2.772,1.623-3.972c0-1.665-0.494-3.205-1.471-4.576c-0.939-1.323-2.723-1.993-5.303-1.993  c-2.559,0-4.311,0.812-5.359,2.478c-1.078,1.713-1.623,3.512-1.623,5.35v0.457H27.935l0.02-0.477  c0.285-6.769,2.701-11.643,7.178-14.487C37.946,18.918,41.446,18,45.53,18c5.346,0,9.859,1.299,13.412,3.861  c3.6,2.596,5.426,6.484,5.426,11.556C64.368,36.254,63.472,38.919,61.704,41.341z"/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/></svg>'
@@ -216,6 +217,7 @@ async def patch_post(
             "post": post,
             "md": md,
             "is_logged_in": is_logged_in,
+            "current_user": current_user,
         },
     )
 
@@ -265,6 +267,7 @@ async def patch_post_html(
             "post": db_post,
             "md": md,
             "is_logged_in": is_logged_in,
+            "current_user": current_user,
         },
     )
 
@@ -294,6 +297,7 @@ async def delete_post(
                 "config": config,
                 "post": db_post,
                 "error": "Not Authorized to edit this post",
+                "current_user": current_user,
             },
         )
 
@@ -304,7 +308,13 @@ async def delete_post(
     session.refresh(db_post)
 
     return config.templates.TemplateResponse(
-        "delete_post_item.html", {"request": request, "config": config, "post": db_post}
+        "delete_post_item.html",
+        {
+            "request": request,
+            "config": config,
+            "post": db_post,
+            "current_user": current_user,
+        },
     )
 
 
@@ -424,3 +434,87 @@ async def get_headers(request: Request):
     headers = [f"<li>{key}: {value}</li>" for key, value in request.headers.items()]
     body = '<ul id="headers">headers</ul>'
     return HTMLResponse(body)
+
+
+@post_router.post("/search/")
+async def search_posts(
+    *,
+    search: Optional[str] = Form(""),
+    request: Request,
+    session: Session = Depends(get_session),
+    hx_request: Annotated[str | None, Header()] = None,
+    accept: Annotated[str | None, Header()] = None,
+    current_user: Annotated[User, Depends(try_get_current_active_user)],
+    # page_size: int = 10,
+    # page: int = 1,
+) -> Posts:
+    "get all posts"
+    page_size = 999999
+    page = 1
+
+    db = Database(config.database_url.split(":///")[-1])
+    if search.strip() == "" or search is None:
+        statement = (
+            select(Post)
+            .where(Post.published)
+            .order_by(Post.id.desc())
+            # .limit(page_size)
+            # .offset((page - 1) * page_size)
+        )
+        posts = session.exec(statement).all()
+
+    else:
+        try:
+            posts = list(db["post"].search(search))
+        except AttributeError:
+            db["post"].enable_fts(
+                ["title", "message", "tags"], create_triggers=True, tokenize="trigram"
+            )
+            posts = list(db["post"].search(search))
+        for post in posts:
+            post["author"] = session.get(User, post["author_id"])
+
+    posts = Posts(__root__=posts)
+
+    if isinstance(current_user, RedirectResponse):
+        is_logged_in = False
+    else:
+        is_logged_in = True
+
+    if hx_request and page == 1 and len(posts.__root__) == 0:
+        return HTMLResponse('<ul id="posts"><li>No posts</li></ul>')
+    if hx_request and len(posts.__root__) == 0:
+        return HTMLResponse("")
+    if not hx_request and len(posts.__root__) == 0:
+        return ["no posts"]
+    if hx_request:
+        return config.templates.TemplateResponse(
+            "posts.html",
+            {
+                "request": request,
+                "config": config,
+                "posts": posts,
+                "md": md,
+                "is_logged_in": is_logged_in,
+                "page_size": page_size,
+                "page": page,
+                "current_user": current_user,
+            },
+        )
+
+    if accept.startswith("text/html"):
+        return config.templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "config": config,
+                "posts": posts,
+                "md": md,
+                "is_logged_in": is_logged_in,
+                "current_user": current_user,
+                "page_size": page_size,
+                "page": page,
+            },
+        )
+
+    return posts

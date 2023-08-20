@@ -31,8 +31,18 @@
     {% endblock %} {% endblock %}
   </head>
   <body class="mx-auto bg-black">
-    {% block header %} {% endblock %} {% block content %} {% if posts %} {%
-    include 'posts.html' %} {% endif %} {{ content | safe }} {% endblock %}
+    {% block header %} {% endblock %} {% block content %} {% if posts %}
+
+<input class="form-control" type="search"
+       name="search"
+       placeholder="Begin Typing To Search Users..."
+       hx-post="/search/"
+       hx-trigger="keyup changed throttle:500ms search"
+       hx-target="#posts"
+       hx-swap='outerHTML'
+       >
+
+    {% include 'posts.html' %} {% endif %} {{ content | safe }} {% endblock %}
     <footer>
       {% block footer %} &copy; Copyright 2023 by
       <a href="http://waylonwalker.com">waylonwalker</a>. {% endblock %}
