@@ -11,7 +11,7 @@
       content="{% block description %}Waylon Walker's Thoughts{% endblock %}"
     />
     <link rel="stylesheet" href="/static/main.css" />
-    <script src="/static/htmx@1.9.3.min.js"></script>
+    <script src="/static/htmx@1.9.4.min.js"></script>
     <script src="/static/json-enc.js"></script>
 
     {% block meta %}
@@ -37,7 +37,7 @@
        name="search"
        placeholder="Begin Typing To Search Thoughts..."
        hx-post="/search/"
-       hx-trigger="keyup changed throttle:100ms search"
+       hx-trigger="keyup changed throttle:100ms"
        hx-target="#posts"
        hx-swap='outerHTML'
        style="margin: auto; display: block; padding: 0.5rem 1rem; width: 50%;"
