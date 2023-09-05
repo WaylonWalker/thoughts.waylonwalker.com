@@ -1,32 +1,25 @@
 <li id="post-{{ post.id }}" class="bg-slate-800">
-  <div class="post-header">
-    <p>@{{ post.author.username }}</p>
-    <a href="/post/{{ post.id}}" title="{{ post.title }}">
-      <h2>{{ post.title }}</h2>
-    </a>
-    <p>{{ post.hr_date }}</p>
-  </div>
-  <p><a href="{{ post.link }}">{{ post.link }}</a></p>
-  {{ config.md.render(post.message) | safe }}
-  <div class="post-admin">
-    {% if is_logged_in %} {% if current_user == post.author %}
-    <button
-      hx-delete="{{ config.root }}/post/{{ post.id }}"
-      hx-target="#post-{{ post.id }}"
-      title="Delete"
-    >
-      {% include 'delete.svg' %}
-    </button>
-    <button
-      hx-get="{{ config.root }}/edit-thought/{{ post.id }}"
-      hx-target="#post-{{ post.id }}"
-      title="Edit"
-    >
-      {% include 'edit.svg' %}
-    </button>
-    {% endif %} {% endif %}
-  </div>
-  {% if error %}
-  <p style="color: #d14040">{{ error }}</p>
-  {% endif %}
+    <div class="post-header">
+        <p>@{{ post.author.username }}</p>
+        <a hx-boost="true" href="/post/{{ post.id}}" title="{{ post.title }}">
+            <a href="/post/{{ post.id}}" title="{{ post.title }}">
+                <h2>{{ post.title }}</h2>
+            </a>
+            <p>{{ post.hr_date }}</p>
+    </div>
+    <p><a href="{{ post.link }}">{{ post.link }}</a></p>
+    {{ config.md.render(post.message) | safe }}
+    <div class="post-admin">
+        {% if is_logged_in %} {% if current_user == post.author %}
+        <button hx-delete="{{ config.root }}/post/{{ post.id }}" hx-target="#post-{{ post.id }}" title="Delete">
+            {% include 'delete.svg' %}
+        </button>
+        <button hx-get="{{ config.root }}/edit-thought/{{ post.id }}" hx-target="#post-{{ post.id }}" title="Edit">
+            {% include 'edit.svg' %}
+        </button>
+        {% endif %} {% endif %}
+    </div>
+    {% if error %}
+    <p style="color: #d14040">{{ error }}</p>
+    {% endif %}
 </li>
