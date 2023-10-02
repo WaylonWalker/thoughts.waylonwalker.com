@@ -452,7 +452,6 @@ async def search_posts(
     page_size = 999999
     page = 1
 
-    db = Database(config.database_url.split(":///")[-1])
     if search.strip() == "" or search is None:
         statement = (
             select(Post)
@@ -465,8 +464,10 @@ async def search_posts(
 
     else:
         try:
+            db = Database(config.database_url.split(":///")[-1])
             posts = list(db["post"].search(search))
-        except AttributeError:
+        except AssertionError:
+            db = Database(config.database_url.split(":///")[-1])
             db["post"].enable_fts(
                 ["title", "message", "tags"], create_triggers=True, tokenize="trigram"
             )

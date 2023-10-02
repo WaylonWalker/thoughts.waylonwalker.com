@@ -1,4 +1,5 @@
 import logging
+import subprocess
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -65,6 +66,22 @@ class LoggedRequestBodySizeMiddleware:
 
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+async def startup_event():
+    # litestream replicate database.db  s3://thoughts.sandcrawler.wayl.one/local-dev.db
+
+    database = config.database_url.split(":///")[-1]
+    proc = subprocess.Popen(
+        [
+            "litestream",
+            "replicate",
+            "-config",
+            config.litestream_config,
+        ]
+    )
+
 
 app.include_router(post_router)
 app.include_router(user_router)
