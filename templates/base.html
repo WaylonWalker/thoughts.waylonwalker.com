@@ -10,7 +10,8 @@
       name="description"
       content="{% block description %}Waylon Walker's Thoughts{% endblock %}"
     />
-    <link rel="stylesheet" href="/static/main.css" />
+    <!-- <link rel="stylesheet" href="/static/main.css" /> -->
+    <link rel="stylesheet" href="/static/app.css" />
     <script src="/static/htmx@1.9.4.min.js"></script>
     <script src="/static/json-enc.js"></script>
 
@@ -28,25 +29,33 @@
     <meta name="twitter:title" content="{{ self.title() }}" />
     <meta name="twitter:description" content="{{ self.description() }}" />
     <meta name="twitter:image" content="/static/social.png" />
+    {% if DEBUG %}
+    {{ hot_reload.script(url_for('hot-reload')) | safe }}
+    {% endif %}
     {% endblock %} {% endblock %}
   </head>
-  <body class="mx-auto bg-black">
+  <body class="mx-auto bg-zinc-800">
+  <div class='flex flex-col h-screen justify-between'>
     {% block header %} {% endblock %} {% block content %} {% if posts %}
 
-<input class="form-control" type="search"
+    <div class='w-full'>
+<input class="form-control m-12 p-4 border shadow-lg border-black bg-zinc-800 rounded mx-auto block"
+       type="search"
        name="search"
        placeholder="Begin Typing To Search Thoughts..."
        hx-post="/search/"
        hx-trigger="keyup changed throttle:100ms"
        hx-target="#posts"
        hx-swap='outerHTML'
-       style="margin: auto; display: block; padding: 0.5rem 1rem; width: 50%;"
        >
+    </div>
 
     {% include 'posts.html' %} {% endif %} {{ content | safe }} {% endblock %}
-    <footer>
+    <div>
+    <footer class='m-5 text-center text-neutral-400'>
       {% block footer %} &copy; Copyright 2023 by
-      <a href="http://waylonwalker.com">waylonwalker</a>. {% endblock %}
+      <a class='text-pink-500 hover:underline' href="http://waylonwalker.com">waylonwalker</a>. {% endblock %}
     </footer>
+  </div>
   </body>
 </html>

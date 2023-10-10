@@ -1,14 +1,4 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './.tailwind/**/*.html',
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-options: {
-      safelist: ['jinja-variable', 'jinja-loop'],
-    },
-}
-
+  content: ["templates/**/*.html"],
+};

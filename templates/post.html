@@ -1,7 +1,7 @@
 {% extends 'base.html' %} {% block title %} {{ post.title }} {% endblock %} {%
 block description %} {{ post.message[0:150] }} {% endblock %} {% block content
 %}
-<ul id="posts" class="m-6 flex-col bg-stone-800 p-5 text-sky-600">
+<ul id="posts" class="m-6 flex-col p-5">
   {% include 'post_item.html' %}
 </ul>
 {% endblock %}

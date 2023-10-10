@@ -2,7 +2,7 @@ from typing import Annotated, Optional
 import urllib.parse
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Header, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, PlainTextResponse
 from markdown_it import MarkdownIt
 from pydantic import BaseModel
 from sqlite_utils import Database
@@ -35,6 +35,25 @@ async def on_startup() -> None:
     ...
 
 
+@post_router.get("/postmd/{post_id}", response_class=PlainTextResponse)
+async def get_post(
+    *,
+    request: Request,
+    session: Session = Depends(get_session),
+    post_id: int,
+    current_user: Annotated[User, Depends(try_get_current_active_user)],
+) -> str:
+    "get one post"
+    post = session.get(Post, post_id)
+    if isinstance(current_user, RedirectResponse):
+        is_logged_in = False
+    else:
+        is_logged_in = True
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return str(post.message)
+
+
 @post_router.get("/post/{post_id}", response_class=HTMLResponse)
 async def get_post(
     *,
@@ -42,6 +61,7 @@ async def get_post(
     session: Session = Depends(get_session),
     post_id: int,
     current_user: Annotated[User, Depends(try_get_current_active_user)],
+    hx_request: Annotated[str | None, Header()] = None,
 ) -> PostRead:
     "get one post"
     post = session.get(Post, post_id)
@@ -51,6 +71,19 @@ async def get_post(
         is_logged_in = True
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
+
+    if hx_request:
+        return config.templates.TemplateResponse(
+            "post_item.html",
+            {
+                "request": request,
+                "config": config,
+                "post": post,
+                "md": md,
+                "is_logged_in": is_logged_in,
+                "current_user": current_user,
+            },
+        )
     return config.templates.TemplateResponse(
         "post.html",
         {

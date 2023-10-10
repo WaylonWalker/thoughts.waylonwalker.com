@@ -25,6 +25,7 @@ class Config(BaseSettings):
     litestream_config: str = None
     root: str = None
     templates = Jinja2Templates(directory="templates")
+    env: str = None
 
     @property
     def md(self):
@@ -37,6 +38,15 @@ class Config(BaseSettings):
                 "highlight": highlight_code,
             },
         )
+
+    @validator("env")
+    def validate_env(cls, v):
+        if v is not None:
+            return v
+        if "FLY_MACHINE_ID" in os.environ:
+            return "prod"
+        else:
+            return "dev"
 
     @validator("database_url")
     def validate_database_url(cls, v):

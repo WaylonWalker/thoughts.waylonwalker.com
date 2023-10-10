@@ -1,30 +1,23 @@
-<div id="loginwrapper">
-  <h1>login</h1>
-  <form
-    class="login"
-    hx-post="{{ config.root }}/login/"
-    hx-target="#loginwrapper"
-    method="POST"
-    name="login"
-  >
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" />
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" />
+<div class="m-auto w-96">
+    <h1 class="mb-6 text-3xl font-bold">login</h1>
+    <form class="login m-auto flex w-80 flex-col shadow-xl shadow-neutral-900" hx-post="{{ config.root }}/login/"
+        hx-target="#loginwrapper" method="POST" name="login">
+        <label class="text-center" for="username">Username:</label>
+        <input class="mx-8 mb-4 border border-black bg-zinc-900 p-1 text-center focus:bg-zinc-800" type="text"
+            id="username" name="username" />
+        <label class="text-center" for="password">Password:</label>
+        <input class="mx-8 mb-4 border border-black bg-zinc-900 p-1 text-center focus:bg-zinc-800" type="password"
+            id="password" name="password" />
 
-    <div style="display: flex; justify-content: center; margin-top: 20px">
-      <input type="submit" value="Login" />
-      <button
-        type="submit"
-        hx-get="{{ config.root }}/signup"
-        hx-target="#loginwrapper"
-        value="Sign Up"
-      >
-        Sign Up
-      </button>
-    </div>
-    {% if error %}
-    <p style="color: #d14040">{{ error }}</p>
-    {% endif %}
-  </form>
+        <div class="my-8 flex w-full justify-evenly">
+            <input class="border border-black bg-zinc-900 px-6 py-2 hover:bg-zinc-800" type="submit" value="Login" />
+            <button class="border border-black bg-zinc-900 px-6 py-2 hover:bg-zinc-800" type="submit"
+                hx-get="{{ config.root }}/signup" hx-target="#loginwrapper" value="Sign Up">
+                Sign Up
+            </button>
+        </div>
+        {% if error %}
+        <p style="color: #d14040">{{ error }}</p>
+        {% endif %}
+    </form>
 </div>
