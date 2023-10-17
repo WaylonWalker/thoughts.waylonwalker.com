@@ -22,13 +22,14 @@
     <meta name="og:image:height" content="640" />
     <meta name="og:image:width" content="1280" />
     <meta name="og:image:type" content="image/png" />
-    <meta name="og:image" content="/static/social.png" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="og:image" content="https://thoughts.waylonwalker.com/shot/?path={{ request.url|quote_plus }}" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@waylonwalker" />
     <meta name="twitter:creator" content="@waylonwalker" />
     <meta name="twitter:title" content="{{ self.title() }}" />
     <meta name="twitter:description" content="{{ self.description() }}" />
-    <meta name="twitter:image" content="/static/social.png" />
+    <meta name="twitter:image" content="https://thoughts.waylonwalker.com/shot/?path={{ request.url|quote_plus }}" content-type='image/png'/>
+    <meta name="twitter:url" content="{{ request.url }}" />
     {% if DEBUG %}
     {{ hot_reload.script(url_for('hot-reload')) | safe }}
     {% endif %}
