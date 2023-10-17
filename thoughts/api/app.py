@@ -1,4 +1,6 @@
 import logging
+import hashlib
+import tempfile
 from pathlib import Path
 import subprocess
 
@@ -9,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from urllib.parse import quote_plus
 
 from thoughts.api.post import post_router
 from thoughts.api.user import user_router
@@ -25,12 +28,15 @@ if config.env == "dev":
     app.add_event_handler("shutdown", hot_reload.shutdown)
     config.templates.env.globals["DEBUG"] = True
     config.templates.env.globals["hot_reload"] = hot_reload
+config.templates.env.filters["quote_plus"] = lambda u: quote_plus(str(u))
 
 PROCS = {}
 
 
 @app.on_event("startup")
 async def start_litestream():
+    if config.env == "dev":
+        return
     database = config.database_url.split(":///")[-1]
     PROCS["litestream"] = subprocess.Popen(
         [
@@ -119,3 +125,38 @@ async def get(request: Request, response_class=HTMLResponse):
     return config.templates.TemplateResponse(
         "index.html", {"request": request, "config": config}
     )
+
+
+from fastapi.responses import FileResponse
+
+
+@app.get("/favicon.ico", response_class=FileResponse)
+async def get_favicon(request: Request):
+    output = "static/8bitcc.ico"
+    return FileResponse(output)
+
+
+@app.get("/robots.txt", response_class=FileResponse)
+async def get_robots(request: Request):
+    output = "static/robots.txt"
+    return FileResponse(output)
+
+
+@app.get("/shot/", response_class=FileResponse)
+async def get_shot(request: Request, path: str):
+    output = "/tmp/" + (hashlib.md5(path.encode()).hexdigest() + ".png").lower()
+    if Path(output).exists():
+        return FileResponse(output)
+    cmd = [
+        "shot-scraper",
+        path,
+        "-h",
+        "450",
+        "-w",
+        "800",
+        "-o",
+        output,
+    ]
+    proc = subprocess.Popen(cmd)
+    res = proc.wait()
+    return FileResponse(output)
