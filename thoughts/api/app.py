@@ -1,12 +1,15 @@
 import logging
+import httpx
+import os
+import asyncio
 import hashlib
 import tempfile
 from pathlib import Path
 import subprocess
 
 from thoughts.api.user import User, try_get_current_active_user
-from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import RedirectResponse, Response, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -16,13 +19,25 @@ from urllib.parse import quote_plus
 from thoughts.api.post import post_router
 from thoughts.api.user import user_router
 from thoughts.config import config
-import arel
 
+from starlette.requests import Request
+from starlette.responses import StreamingResponse
+from starlette.background import BackgroundTask
+from diskcache import Cache
 
+cache = Cache("cache", size_limit=0.5 * (2**30))
 app = FastAPI()
+httpx_client = httpx.AsyncClient(timeout=30.0)
+
+ACCESS_KEY = os.environ.get("ACCESS_KEY")
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 if config.env == "dev":
-    hot_reload = arel.HotReload(paths=[arel.Path(".")])
+    import arel
+
+    hot_reload = arel.HotReload(
+        paths=[arel.Path("static"), arel.Path("templates"), arel.Path("thoughts")]
+    )
     app.add_websocket_route("/hot-reload", route=hot_reload, name="hot-reload")
     app.add_event_handler("startup", hot_reload.startup)
     app.add_event_handler("shutdown", hot_reload.shutdown)
@@ -38,6 +53,10 @@ async def start_litestream():
     if config.env == "dev":
         return
     database = config.database_url.split(":///")[-1]
+    litestream_lock = Path("/tmp/litestream.lock")
+    if litestream_lock.exists():
+        return
+    litestream_lock.touch()
     PROCS["litestream"] = subprocess.Popen(
         [
             config.litestream_cmd,
@@ -49,20 +68,20 @@ async def start_litestream():
 
 
 # on startup run tailwind if in dev mode
-@app.on_event("startup")
-async def start_tailwind():
-    if config.env == "dev":
-        PROCS["tailwind"] = subprocess.Popen(
-            [
-                "npx",
-                "tailwindcss",
-                "--input",
-                "tailwind/app.css",
-                "--output",
-                "static/app.css",
-                "--watch",
-            ]
-        )
+# @app.on_event("startup")
+# async def start_tailwind():
+#     if config.env == "dev":
+#         PROCS["tailwind"] = subprocess.Popen(
+#             [
+#                 "npx",
+#                 "tailwindcss",
+#                 "--input",
+#                 "tailwind/app.css",
+#                 "--output",
+#                 "static/app.css",
+#                 "--watch",
+#             ]
+#         )
 
 
 @app.on_event("shutdown")
@@ -142,21 +161,59 @@ async def get_robots(request: Request):
     return FileResponse(output)
 
 
-@app.get("/shot/", response_class=FileResponse)
+# @app.get("/shot/", response_class=FileResponse)
+# async def get_shot(request: Request, path: str):
+#     output = "/tmp/" + (hashlib.md5(path.encode()).hexdigest() + ".png").lower()
+#     if Path(output).exists():
+#         return FileResponse(output)
+#     cmd = [
+#         "shot-scraper",
+#         path,
+#         "-h",
+#         "450",
+#         "-w",
+#         "800",
+#         "-o",
+#         output,
+#     ]
+#     proc = subprocess.Popen(cmd)
+#     res = proc.wait()
+#     return FileResponse(output)
+
+
+@app.get("/shot/", responses={200: {"content": {"image/png": {}}}})
 async def get_shot(request: Request, path: str):
-    output = "/tmp/" + (hashlib.md5(path.encode()).hexdigest() + ".png").lower()
-    if Path(output).exists():
-        return FileResponse(output)
-    cmd = [
-        "shot-scraper",
-        path,
-        "-h",
-        "450",
-        "-w",
-        "800",
-        "-o",
-        output,
-    ]
-    proc = subprocess.Popen(cmd)
-    res = proc.wait()
-    return FileResponse(output)
+    from minio import Minio
+    from minio.error import S3Error
+
+    if not path.startswith("http"):
+        raise HTTPException(status_code=404, detail="path is not a url")
+
+    imgname = (hashlib.md5(path.encode()).hexdigest() + ".png").lower()
+    client = Minio(
+        "sandcrawler.wayl.one",
+        access_key=ACCESS_KEY,
+        secret_key=SECRET_KEY,
+    )
+    try:
+        imgdata = cache.get(imgname)
+        if not imgdata:
+            imgdata = client.get_object("images.thoughts", imgname)
+            cache.set(imgname, imgdata)
+        return Response(
+            content=imgdata,
+            media_type="image/webp",
+            headers={"Cache-Control": "public, max-age=604800"},
+        )
+
+    except S3Error:
+        print("failed to get from minio, proxying from shot.wayl.one")
+        path = f"https://shot.wayl.one/shot/?path={path}"
+        req = httpx_client.build_request("GET", path)
+        r = await httpx_client.send(req, stream=False)
+        cache.set(imgname, r.content)
+        # req = httpx_client.build_request("GET", path)
+        # r = await httpx_client.send(req, stream=True)
+        return Response(
+            r.content, background=BackgroundTask(r.aclose), headers=r.headers
+        )

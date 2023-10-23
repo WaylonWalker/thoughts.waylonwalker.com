@@ -31,7 +31,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 525960
 
 user_router = APIRouter()
 cookie_sec = APIKeyCookie(name=SESSION_NAME)
-templates = Jinja2Templates(directory="templates")
+# templates = Jinja2Templates(directory="templates")
 
 
 UserExistsException = HTTPException(
@@ -163,9 +163,9 @@ async def try_get_current_active_user(
         token = None
 
     if token is None and session is None and hx_request:
-        return templates.TemplateResponse(
-            "login_form.html", {"request": request,
-                                "config": config, "error": 'Not authenticated'}
+        return config.templates.TemplateResponse(
+            "login_form.html",
+            {"request": request, "config": config, "error": "Not authenticated"},
         )
     if token is None and session is None:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
@@ -202,24 +202,25 @@ async def get_login(
     hx_request: Annotated[str | None, Header()] = None,
 ):
     if hx_request:
-        return templates.TemplateResponse(
+        return config.templates.TemplateResponse(
             "login_form.html", {"request": request, "config": config}
         )
-    return templates.TemplateResponse(
+    return config.templates.TemplateResponse(
         "login.html", {"request": request, "config": config}
     )
 
 
 @user_router.get("/logout")
-async def get_logout(request: Request,
-                     hx_request: Annotated[str | None, Header()] = None,
-                     ):
+async def get_logout(
+    request: Request,
+    hx_request: Annotated[str | None, Header()] = None,
+):
     if hx_request:
-        response = templates.TemplateResponse(
+        response = config.templates.TemplateResponse(
             "logout_partial.html", {"request": request, "config": config}
         )
     else:
-        response = templates.TemplateResponse(
+        response = config.templates.TemplateResponse(
             "logout.html", {"request": request, "config": config}
         )
     response.delete_cookie(SESSION_NAME)
@@ -236,15 +237,19 @@ async def post_login(
     try:
         user = authenticate_user(form_data.username, form_data.password)
     except HTTPException:
-        return templates.TemplateResponse(
-            "login_form.html", {"request": request,
-                                "config": config, "error": 'Incorrect username or password'}
+        return config.templates.TemplateResponse(
+            "login_form.html",
+            {
+                "request": request,
+                "config": config,
+                "error": "Incorrect username or password",
+            },
         )
 
     if not user and hx_request:
-        return templates.TemplateResponse(
-            "login_form.html", {"request": request,
-                                "config": config, "error": 'Not authenticated'}
+        return config.templates.TemplateResponse(
+            "login_form.html",
+            {"request": request, "config": config, "error": "Not authenticated"},
         )
 
     if not user:
@@ -257,7 +262,7 @@ async def post_login(
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    response = templates.TemplateResponse(
+    response = config.templates.TemplateResponse(
         "hx_get_new_thought.html",
         {
             "request": request,
@@ -271,7 +276,7 @@ async def post_login(
 
 
 @user_router.get("/signup")
-@htmx(template='signup')
+@htmx(template="signup")
 async def get_signup(
     request: Request,
 ):
@@ -287,29 +292,28 @@ async def post_signup(
     session: Session = Depends(get_session),
     hx_request: Annotated[str | None, Header()] = None,
 ):
-
     db_user = User.from_orm(user)
     existing = session.exec(select(User).where(User.username == user.username)).first()
     existing_email = session.exec(select(User).where(User.email == user.email)).first()
 
     if (existing is not None or existing_email is not None) and hx_request:
-        return templates.TemplateResponse(
-            "signup_partial.html", {"request": request,
-                                    "config": config, "error": 'username already exists'}
+        return config.templates.TemplateResponse(
+            "signup_partial.html",
+            {"request": request, "config": config, "error": "username already exists"},
         )
     if existing is not None or existing_email is not None:
-        return templates.TemplateResponse(
-            "signup.html", {"request": request,
-                            "config": config, "error": 'username already exists'}
+        return config.templates.TemplateResponse(
+            "signup.html",
+            {"request": request, "config": config, "error": "username already exists"},
         )
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
 
     if not user and hx_request:
-        return templates.TemplateResponse(
-            "login_form.html", {"request": request,
-                                "config": config, "error": 'Not authenticated'}
+        return config.templates.TemplateResponse(
+            "login_form.html",
+            {"request": request, "config": config, "error": "Not authenticated"},
         )
 
     if not user:
@@ -322,7 +326,7 @@ async def post_signup(
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    response = templates.TemplateResponse(
+    response = config.templates.TemplateResponse(
         "hx_get_new_thought.html",
         {
             "request": request,
@@ -351,12 +355,12 @@ async def get_new_thought(
     hx_request: Annotated[str | None, Header()] = None,
 ):
     if isinstance(current_user, User):
-        return templates.TemplateResponse(
+        return config.templates.TemplateResponse(
             "new_thought.html",
             {"request": request, "config": config, "current_user": current_user},
         )
     if hx_request:
-        return templates.TemplateResponse(
+        return config.templates.TemplateResponse(
             "login_form.html", {"request": request, "config": config}
         )
     return current_user

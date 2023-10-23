@@ -1,7 +1,7 @@
-<div class="m-auto w-96">
+<div id="loginwrapper" class="m-auto w-96">
     <h1 class="mb-6 text-3xl font-bold">login</h1>
     <form class="login m-auto flex w-80 flex-col shadow-xl shadow-neutral-900" hx-post="{{ config.root }}/login/"
-        hx-target="#loginwrapper" method="POST" name="login">
+        action="{{ config.root }}/login/" hx-target="#loginwrapper" method="POST" name="login">
         <label class="text-center" for="username">Username:</label>
         <input class="mx-8 mb-4 border border-black bg-zinc-900 p-1 text-center focus:bg-zinc-800" type="text"
             id="username" name="username" />
