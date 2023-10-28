@@ -6,6 +6,7 @@ from sqlmodel import Session
 from markdown_it import MarkdownIt
 from fastapi.templating import Jinja2Templates
 from thoughts.highlight import highlight_code
+from urllib.parse import quote_plus
 
 
 class ApiServer(BaseModel):
@@ -17,6 +18,30 @@ class ApiServer(BaseModel):
     workers: int = 1
     forwarded_allow_ips: str = "*"
 
+    @validator("workers")
+    def validate_workers(cls, v):
+        if v is not None:
+            return v
+        if "FLY_MACHINE_ID" in os.environ:
+            return 8
+        else:
+            return 1
+
+    @validator("reload")
+    def validate_reload(cls, v):
+        if v is not None:
+            return v
+        if "FLY_MACHINE_ID" in os.environ:
+            return False
+        else:
+            return True
+
+
+def get_templates():
+    templates = Jinja2Templates(directory="templates")
+    templates.env.filters["quote_plus"] = lambda u: quote_plus(str(u))
+    return templates
+
 
 class Config(BaseSettings):
     api_server: ApiServer = ApiServer()
@@ -24,7 +49,7 @@ class Config(BaseSettings):
     litestream_cmd: str = None
     litestream_config: str = None
     root: str = None
-    templates = Jinja2Templates(directory="templates")
+    templates = get_templates()
     env: str = None
 
     @property

@@ -117,12 +117,12 @@ async def get_post(
             "is_logged_in": is_logged_in,
             "current_user": current_user,
             "plain": False,
-            "shot_url": str(request.url).replace("/post/", "/plain_post/", 1),
+            "shot_url": str(request.url).replace("/post/", "/post-og/", 1),
         },
     )
 
 
-@post_router.get("/plain_post/{post_id}", response_class=HTMLResponse)
+@post_router.get("/post-og/{post_id}", response_class=HTMLResponse)
 async def get_post(
     *,
     request: Request,
@@ -140,21 +140,8 @@ async def get_post(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    if hx_request:
-        return config.templates.TemplateResponse(
-            "post_item.html",
-            {
-                "request": request,
-                "config": config,
-                "post": post,
-                "md": md,
-                "is_logged_in": is_logged_in,
-                "current_user": current_user,
-                "plain": True,
-            },
-        )
     return config.templates.TemplateResponse(
-        "post.html",
+        "post-og.html",
         {
             "request": request,
             "config": config,
@@ -162,7 +149,8 @@ async def get_post(
             "md": md,
             "is_logged_in": is_logged_in,
             "current_user": current_user,
-            "plain": True,
+            "plain": False,
+            "shot_url": str(request.url).replace("/post/", "/post-og/", 1),
         },
     )
 
@@ -469,7 +457,7 @@ async def get_posts(
     current_user: Annotated[User, Depends(try_get_current_active_user)],
     page_size: int = 10,
     page: int = 1,
-) -> Posts:
+):
     "get all posts"
     statement = (
         select(Post)

@@ -1,0 +1,40 @@
+{% extends 'base.html' %} {% block title %} {{ post.title }} {% endblock %} {%
+block description %} {{ post.message[0:150] }} {% endblock %} {% block content
+%}
+<style>
+    .copy-wrapper {
+        height: 0;
+        overflow: hidden;
+        width: 0;
+    }
+
+    .highlight {
+        margin-top: -70px;
+    }
+</style>
+<div class="h-[450px] w-[800px] overflow-hidden rounded-2xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500">
+    <div
+        class="m-4 h-[415px] overflow-hidden rounded-2xl bg-neutral-900 shadow-2xl shadow-neutral-900/80 ring-4 ring-white/50">
+        <div class="post-header flex w-full items-start justify-between p-2 text-xl text-pink-500">
+            <p class="text-2xl">@{{ post.author.username }}<span class='text-pink-500/50'>'s thoughts<span></p>
+            <div class="flex flex-col items-end">
+                <p class="text-5xl font-black">{{ post.hr_date.split(' ')[0] }}</p>
+                <p class="text-sm">{{ ' '.join(post.hr_date.split(' ')[1:]) }}</p>
+            </div>
+        </div>
+        <div class="flex">
+            <a href="/post/{{ post.id}}" title="{{ post.title }}" class="basis-2/3 text-cyan-200 hover:underline">
+                <h2 class="pl-5 text-5xl font-extrabold" title="{{ post.title }}">
+                    {{ post.title[0:45] }} {% if post.title|length > 45 %} ... {% endif %}
+                </h2>
+            </a>
+            <div class="post-body  overflow-hidden m-[-10px]">
+                {{ config.md.render(post.message) | safe }}
+            </div>
+        </div>
+        <a class="px-5 text-cyan-200 underline" href="{{ post.link }}">
+            {{ post.link[0:120] }} {% if post.link|length > 120 %} ... {% endif %}
+        </a>
+    </div>
+</div>
+{% endblock %}

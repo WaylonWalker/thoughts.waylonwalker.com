@@ -9,8 +9,8 @@ RUN pip3 install --no-cache-dir --root-user-action=ignore --upgrade pip
 RUN pip3 install --no-cache-dir --root-user-action=ignore '.[all]'
 COPY . /app
 RUN pip3 install --no-cache-dir --root-user-action=ignore '.[all]'
-RUN playwright install
-RUN playwright install-deps
+# RUN playwright install
+# RUN playwright install-deps
 RUN apt update && \
     apt install curl -y && \
     .installer/install-litestream.sh && \
@@ -18,6 +18,7 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists/*
 RUN mv litestream /usr/local/bin
 RUN touch database.db
+
 
 EXPOSE 5000
 
