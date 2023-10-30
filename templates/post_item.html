@@ -2,8 +2,8 @@
     {% if post.link.startswith('http') and not plain %}
     <a href="{{ post.link }}" title="{{ post.title }}">
         <img class="object-fit aspect-[800/450] w-full rounded-lg border border-black bg-neutral-900 shadow-lg shadow-neutral-900"
-            src="{{ config.root }}/shot/?path={{ post.link|quote_plus }}" alt="{{ post.title }}"
-            title="{{ post.title }}" />
+            src="https://shots.wayl.one/shot/?url={{ post.link|quote_plus }}&height=450&width=800&scaled_width=800&scaled_height=450&selectors="
+            alt="{{ post.title }}" title="{{ post.title }}" />
     </a>
     {% endif %}
     <div class="post-header flex w-full items-start justify-between p-5 text-pink-500">
