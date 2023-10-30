@@ -34,12 +34,22 @@
                 </div>
             </div>
             <div class="flex">
-                <a href="/post/{{ post.id}}" title="{{ post.title }}" class="basis-2/3 text-cyan-200 hover:underline">
-                    <h2 class="pl-5 text-5xl font-extrabold" title="{{ post.title }}">
-                        {{ post.title[0:45] }} {% if post.title|length > 45 %} ... {% endif %}
-                    </h2>
-                </a>
-                <div class="post-body  overflow-hidden m-[-10px]">
+                <div class="flex flex-col">
+                    <a href="/post/{{ post.id}}" title="{{ post.title }}" class="text-cyan-200 hover:underline">
+                        <h2 class="pl-5 text-5xl font-extrabold break-all max-w-[50vw]" title="{{ post.title }}"
+                            style='text-wrap: pretty;'>
+                            {{ post.title[0:45] }} {% if post.title|length > 45 %} ... {% endif %}
+                        </h2>
+                    </a>
+                    <a href="/post/{{ post.id}}" title="{{ post.title }}"
+                        class="text-cyan-200 hover:underline self-center p-10">
+                        <img class="h-300 w-600 object-fit aspect-[600/300] rounded-lg border border-black bg-neutral-900 shadow-lg shadow-neutral-900"
+                            src="https://shots.wayl.one/shot/?url={{ post.link|quote_plus }}&height=600&width=1200&scaled_width=600&scaled_height=300&selectors="
+                            height="300" width="600" />
+                    </a>
+                </div>
+
+                <div class="post-body  overflow-hidden m-[-10px] basis-1/2 w-128">
                     {{ config.md.render(post.message) | safe }}
                 </div>
             </div>
