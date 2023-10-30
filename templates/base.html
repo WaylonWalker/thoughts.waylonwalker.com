@@ -22,11 +22,11 @@
     <meta name="og:image:width" content="1280" />
     <meta name="og:image:type" content="image/png" />
     {% if shot_url %}
-    <meta name="og:image" content="https://thoughts.waylonwalker.com/shot/?path={{ shot_url|quote_plus }}" />
-    <meta name="twitter:image" content="https://thoughts.waylonwalker.com/shot/?path={{ shot_url|quote_plus }}" content-type='image/png'/>
+    <meta name="og:image" content="https://shots.wayl.one/shot/?path={{ shot_url|quote_plus }}&height=640&width=1280&scaled_width=1280&scaled_height=640&selectors=" />
+    <meta name="twitter:image" content="https://shots.wayl.one/shot/?path={{ shot_url|quote_plus }}&height=600&width=1200&scaled_width=1200&scaled_height=600&selectors=" content-type='image/png'/>
     {% else %}
-    <meta name="og:image" content="https://thoughts.waylonwalker.com/shot/?path={{ request.url|quote_plus }}" />
-    <meta name="twitter:image" content="https://thoughts.waylonwalker.com/shot/?path={{ request.url|quote_plus }}" content-type='image/png'/>
+    <meta name="og:image" content="https://shots.wayl.one/shot/?path={{ request.url|quote_plus }}&height=640&width=1280&scaled_width=1280&scaled_height=640&selectors=" />
+    <meta name="twitter:image" content="https://shots.wayl.one/shot/?path={{ request.url|quote_plus }}&height=600&width=1200&scaled_width=1200&scaled_height=600&selectors=" content-type='image/png'/>
     {% endif %}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@waylonwalker" />
