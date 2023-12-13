@@ -1,10 +1,20 @@
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
+import base64
+from typing import Annotated, Optional
 from sqlalchemy.exc import NoResultFound
 from thoughts.htmx import htmx
 from sqlmodel import select, Session
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Header, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Form,
+    HTTPException,
+    Header,
+    Request,
+    status,
+    Body,
+)
 from fastapi.responses import RedirectResponse
 from fastapi.security import (
     APIKeyCookie,
@@ -136,6 +146,7 @@ async def get_current_user(
             raise credentials_exception
 
     # user = authenticate_user(token_data.username, token_data.password)
+
     user = get_user(token_data.username)
     return user
 
@@ -162,6 +173,18 @@ async def try_get_current_active_user(
     except starlette.exceptions.HTTPException:
         token = None
 
+    if token is None and session is None:
+        basic_auth = request.headers.get("Authorization", None)
+
+        if basic_auth is not None:
+            basic_auth = basic_auth.split(" ")
+            basic_auth = basic_auth[1]
+            basic_auth = base64.b64decode(basic_auth)
+            basic_auth = basic_auth.decode("utf-8")
+            username, password = basic_auth.split(":")
+            user = authenticate_user(username, password)
+            return user
+
     if token is None and session is None and hx_request:
         return config.templates.TemplateResponse(
             "login_form.html",
@@ -179,10 +202,9 @@ async def try_get_current_active_user(
 
 @user_router.post("/token", response_model=Token)
 async def login_for_access_token(
-    username: Annotated[str, Form()],
-    password: Annotated[str, Form()],
+    user: Annotated[User | None, Depends(try_get_current_active_user)],
+    request: Request,
 ):
-    user = authenticate_user(username, password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
