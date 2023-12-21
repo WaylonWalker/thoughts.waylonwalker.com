@@ -200,6 +200,7 @@ async def post_post(
                 "current_user": current_user,
             },
         )
+    config.mastodon.toot(f"https://thoughts.waylonwalker.com/post/{db_post['id']}")
     return db_post
 
 

@@ -1,4 +1,5 @@
 import logging
+import base64
 import httpx
 import os
 import asyncio
@@ -29,8 +30,8 @@ cache = Cache("cache", size_limit=0.5 * (2**30))
 app = FastAPI()
 httpx_client = httpx.AsyncClient(timeout=30.0)
 
-ACCESS_KEY = os.environ.get("ACCESS_KEY")
-SECRET_KEY = os.environ.get("SECRET_KEY")
+# ACCESS_KEY = os.environ.get("ACCESS_KEY")
+# SECRET_KEY = os.environ.get("SECRET_KEY")
 
 if config.env == "dev":
     import arel
@@ -181,39 +182,39 @@ async def get_robots(request: Request):
 #     return FileResponse(output)
 
 
-@app.get("/shot/", responses={200: {"content": {"image/png": {}}}})
-async def get_shot(request: Request, path: str):
-    from minio import Minio
-    from minio.error import S3Error
+# @app.get("/shot/", responses={200: {"content": {"image/png": {}}}})
+# async def get_shot(request: Request, path: str):
+#     from minio import Minio
+#     from minio.error import S3Error
 
-    if not path.startswith("http"):
-        raise HTTPException(status_code=404, detail="path is not a url")
+#     if not path.startswith("http"):
+#         raise HTTPException(status_code=404, detail="path is not a url")
 
-    imgname = (hashlib.md5(path.encode()).hexdigest() + ".png").lower()
-    client = Minio(
-        "sandcrawler.wayl.one",
-        access_key=ACCESS_KEY,
-        secret_key=SECRET_KEY,
-    )
-    try:
-        imgdata = cache.get(imgname)
-        if not imgdata:
-            imgdata = client.get_object("images.thoughts", imgname)
-            cache.set(imgname, imgdata)
-        return Response(
-            content=imgdata,
-            media_type="image/webp",
-            headers={"Cache-Control": "public, max-age=604800"},
-        )
+#     imgname = (hashlib.md5(path.encode()).hexdigest() + ".png").lower()
+#     client = Minio(
+#         "sandcrawler.wayl.one",
+#         access_key=ACCESS_KEY,
+#         secret_key=SECRET_KEY,
+#     )
+#     try:
+#         imgdata = cache.get(imgname)
+#         if not imgdata:
+#             imgdata = client.get_object("images.thoughts", imgname)
+#             cache.set(imgname, imgdata)
+#         return Response(
+#             content=imgdata,
+#             media_type="image/webp",
+#             headers={"Cache-Control": "public, max-age=604800"},
+#         )
 
-    except S3Error:
-        print("failed to get from minio, proxying from shot.wayl.one")
-        path = f"https://shot.wayl.one/shot/?path={path}"
-        req = httpx_client.build_request("GET", path)
-        r = await httpx_client.send(req, stream=False)
-        cache.set(imgname, r.content)
-        # req = httpx_client.build_request("GET", path)
-        # r = await httpx_client.send(req, stream=True)
-        return Response(
-            r.content, background=BackgroundTask(r.aclose), headers=r.headers
-        )
+#     except S3Error:
+#         print("failed to get from minio, proxying from shot.wayl.one")
+#         path = f"https://shot.wayl.one/shot/?path={path}"
+#         req = httpx_client.build_request("GET", path)
+#         r = await httpx_client.send(req, stream=False)
+#         cache.set(imgname, r.content)
+#         # req = httpx_client.build_request("GET", path)
+#         # r = await httpx_client.send(req, stream=True)
+#         return Response(
+#             r.content, background=BackgroundTask(r.aclose), headers=r.headers
+#         )

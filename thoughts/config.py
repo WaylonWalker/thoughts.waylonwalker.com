@@ -7,6 +7,7 @@ from markdown_it import MarkdownIt
 from fastapi.templating import Jinja2Templates
 from thoughts.highlight import highlight_code
 from urllib.parse import quote_plus
+from mastodon import Mastodon
 
 
 class ApiServer(BaseModel):
@@ -43,6 +44,21 @@ def get_templates():
     return templates
 
 
+def get_mastodon():
+    Mastodon.create_app(
+        "pytooterapp",
+        api_base_url="https://fosstodon.org",
+        to_file="pytooter_clientcred.secret",
+    )
+    mastodon = Mastodon(
+        client_id="pytooter_clientcred.secret",
+    )
+    mastodon.log_in(
+        username="waylon@waylonwalker.com", password=os.environ.get("MASTODON_PW", "")
+    )
+    return mastodon
+
+
 class Config(BaseSettings):
     api_server: ApiServer = ApiServer()
     database_url: str = None
@@ -51,6 +67,7 @@ class Config(BaseSettings):
     root: str = None
     templates = get_templates()
     env: str = None
+    mastodon = get_mastodon()
 
     @property
     def md(self):
