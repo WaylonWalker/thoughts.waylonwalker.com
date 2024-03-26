@@ -8,6 +8,8 @@ from thoughts.models.post import Post
 from thoughts.models.user import User
 from sqlmodel import SQLModel
 
+SQLModel.metadata.create_all(engine)
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

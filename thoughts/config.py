@@ -1,13 +1,15 @@
 import os
-from pydantic import BaseSettings, BaseModel, validator
 from pathlib import Path
+from urllib.parse import quote_plus
+
+from fastapi.templating import Jinja2Templates
+from markdown_it import MarkdownIt
+from mastodon import Mastodon
+from pydantic import BaseModel, BaseSettings, validator
 from sqlalchemy import create_engine
 from sqlmodel import Session
-from markdown_it import MarkdownIt
-from fastapi.templating import Jinja2Templates
+
 from thoughts.highlight import highlight_code
-from urllib.parse import quote_plus
-from mastodon import Mastodon
 
 
 class ApiServer(BaseModel):
@@ -67,7 +69,7 @@ class Config(BaseSettings):
     root: str = None
     templates = get_templates()
     env: str = None
-    mastodon = get_mastodon()
+    # mastodon = get_mastodon()
 
     @property
     def md(self):

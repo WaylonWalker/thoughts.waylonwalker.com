@@ -1,10 +1,10 @@
 <li id="post-{{ post.id }}" class="m-5 overflow-x-auto rounded-lg border border-black shadow-xl">
     {% if post.link.startswith('http') and not plain %}
-    <a href="{{ post.link }}" title="{{ post.title }}">
-        <img class="object-fit aspect-[800/450] w-full rounded-lg border border-black bg-neutral-900 shadow-lg shadow-neutral-900"
-            src="https://shots.wayl.one/shot/?url={{ post.link|quote_plus }}&height=450&width=800&scaled_width=800&scaled_height=450&selectors="
-            alt="{{ post.title }}" title="{{ post.title }}" />
-    </a>
+        <a href="{{ post.link }}" title="{{ post.title }}">
+            <img class="object-fit aspect-[800/450] w-full rounded-lg border border-black bg-neutral-900 shadow-lg shadow-neutral-900"
+                 src="https://shots.wayl.one/shot/?url={{ post.link|quote_plus }}&height=450&width=800&scaled_width=800&scaled_height=450&selectors="
+                 alt="{{ post.title }}" title="{{ post.title }}" />
+        </a>
     {% endif %}
     <div class="post-header flex w-full items-start justify-between p-5 text-pink-500">
         <p>@{{ post.author.username }}</p>
@@ -18,19 +18,22 @@
     <a class="px-5 text-cyan-200 underline" href="{{ post.link }}">
         {{ post.link[0:70] }} {% if post.link|length > 70 %} ... {% endif %}
     </a>
-    <div class="post-body mt-5">{{ config.md.render(post.message) | safe }}</div>
+
+    {% if post.message %}
+        <div class="post-body mt-5">{{ config.md.render(post.message) | safe }}</div>
+    {% endif %}
     {% if is_logged_in %} {% if current_user == post.author %}
-    <div class="post-admin flex w-full flex-row items-end justify-end gap-2 rounded-b-lg bg-neutral-900 p-1">
-        <button class="h-8 w-8 p-1" hx-delete="{{ config.root }}/post/{{ post.id }}" hx-target="#post-{{ post.id }}"
-            title="Delete">
-            {% include 'delete.svg' %}
-        </button>
-        <button class="h-8 w-8 p-1 text-center" hx-get="{{ config.root }}/edit-thought/{{ post.id }}"
-            hx-target="#post-{{ post.id }}" title="Edit">
-            {% include 'edit.svg' %}
-        </button>
-    </div>
+        <div class="post-admin flex w-full flex-row items-end justify-end gap-2 rounded-b-lg bg-neutral-900 p-1">
+            <button class="h-8 w-8 p-1" hx-delete="{{ config.root }}/post/{{ post.id }}" hx-target="#post-{{ post.id }}"
+                    title="Delete">
+                {% include 'delete.svg' %}
+            </button>
+            <button class="h-8 w-8 p-1 text-center" hx-get="{{ config.root }}/edit-thought/{{ post.id }}"
+                    hx-target="#post-{{ post.id }}" title="Edit">
+                {% include 'edit.svg' %}
+            </button>
+        </div>
     {% endif %} {% endif %} {% if error %}
-    <p style="color: #d14040">{{ error }}</p>
+        <p style="color: #d14040">{{ error }}</p>
     {% endif %}
 </li>
