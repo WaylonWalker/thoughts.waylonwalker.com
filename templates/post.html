@@ -1,6 +1,15 @@
 {% extends 'base.html' %} {% block title %} {{ post.title }} {% endblock %} {%
 block description %} {{ post.message[0:150] }} {% endblock %} {% block content
 %}
+
+<nav class='mx-auto container max-w-md m-12 p-4'>
+  <ul class="flex justify-center">
+    <li>
+      <a class="text-pink-500 hover:underline font-bold" href="/">Thoughts-Home</a>
+    </li>
+  </ul>
+</nav>
+<p class='text-xl font-thin max-w-lg my-12 mx-auto'> You found my thought's a collection of short posts generally tied to a link on the web and written through a small chrome extension. See full posts on <a href='https://waylonwalker.com' class='text-pink-500 font-normal'>waylonwalker.com</a> </p>
 <ul id="posts" class="m-auto container max-w-4xl">
   {% include 'post_item.html' %}
 </ul>
