@@ -191,6 +191,12 @@ async def get_robots(request: Request):
     return FileResponse(output)
 
 
+@app.get("/manifest.json", response_class=FileResponse)
+async def get_robots(request: Request):
+    output = "static/manifest.json"
+    return FileResponse(output)
+
+
 # @app.get("/shot/", response_class=FileResponse)
 # async def get_shot(request: Request, path: str):
 #     output = "/tmp/" + (hashlib.md5(path.encode()).hexdigest() + ".png").lower()
