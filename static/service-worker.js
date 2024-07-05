@@ -3,6 +3,16 @@ self.addEventListener('install', function(event) {
     caches.open('thoughts-cache').then(function(cache) {
       return cache.addAll([
         '/',
+        '/manifest.json',
+        '/static/app.css',
+        '/static/htmx@1.9.4.min.js',
+        '/static/json-enc.js',
+        '/static/main.js',
+        '/static/manifest.json',
+        '/static/service-worker.js',
+        '/static/8bitcc.ico',
+        '/static/8bitcc.png',
+
       ]);
     })
   );
