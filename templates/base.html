@@ -14,6 +14,17 @@
       <link rel="stylesheet" href="/static/app.css" />
       <script src="/static/htmx@1.9.4.min.js"></script>
       <script src="/static/json-enc.js"></script>
+      <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/static/service-worker.js').then(function(registration) {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, function(error) {
+              console.log('ServiceWorker registration failed: ', error);
+            });
+          });
+        }
+      </script>
 
       {% block meta %}
         <meta name="og:title" content="{{ self.title() }}" />

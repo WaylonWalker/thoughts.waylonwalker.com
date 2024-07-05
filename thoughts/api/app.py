@@ -1,30 +1,32 @@
-import logging
-import base64
-import httpx
-import os
 import asyncio
+import base64
 import hashlib
+import logging
+import os
+import subprocess
 import tempfile
 from pathlib import Path
-import subprocess
-
-from thoughts.api.user import User, try_get_current_active_user
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import RedirectResponse, Response, StreamingResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from urllib.parse import quote_plus
 
-from thoughts.api.post import post_router
-from thoughts.api.user import user_router
-from thoughts.config import config
-
+import httpx
+from diskcache import Cache
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import (
+    HTMLResponse,
+    RedirectResponse,
+    Response,
+    StreamingResponse,
+)
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from starlette.background import BackgroundTask
 from starlette.requests import Request
 from starlette.responses import StreamingResponse
-from starlette.background import BackgroundTask
-from diskcache import Cache
+
+from thoughts.api.post import post_router
+from thoughts.api.user import User, try_get_current_active_user, user_router
+from thoughts.config import config
 
 cache = Cache("cache", size_limit=0.5 * (2**30))
 app = FastAPI()
@@ -145,6 +147,27 @@ async def get(request: Request, response_class=HTMLResponse):
     return config.templates.TemplateResponse(
         "index.html", {"request": request, "config": config}
     )
+
+
+@app.post("/share")
+async def handle_share(
+    title: str = Form(...),
+    text: str = Form(...),
+    url: str = Form(...),
+    file: UploadFile = File(...),
+):
+    content = f"""
+    <html>
+    <body>
+    <h1>Shared Content</h1>
+    <p>Title: {title}</p>
+    <p>Text: {text}</p>
+    <p>URL: {url}</p>
+    <img src="{await file.read()}">
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=content)
 
 
 from fastapi.responses import FileResponse
