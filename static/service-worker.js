@@ -11,8 +11,7 @@ self.addEventListener('install', function(event) {
         '/static/manifest.json',
         '/static/service-worker.js',
         '/static/8bitcc.ico',
-        '/static/8bitcc.png',
-
+        '/static/8bitcc.png'
       ]);
     })
   );
