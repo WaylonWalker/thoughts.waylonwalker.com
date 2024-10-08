@@ -25,5 +25,3 @@ def run(
     ),
 ):
     uvicorn.run(**config.api_server.dict())
-
-

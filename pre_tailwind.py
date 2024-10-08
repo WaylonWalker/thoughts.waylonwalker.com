@@ -1,16 +1,17 @@
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape, Undefined
 
+
 class SilentUndefined(Undefined):
     def _fail_with_undefined_error(self, *args, **kwargs):
-        return ''
+        return ""
+
 
 env = Environment(
     loader=FileSystemLoader("templates"),
     autoescape=select_autoescape(),
     undefined=SilentUndefined,
 )
-
 
 
 templates = Path().glob("templates/*.html")
@@ -21,7 +22,7 @@ from thoughts.models.post import Posts
 from thoughts.config import config
 
 for template in templates:
-    html = env.get_template(template.name).render(posts=Posts(__root__=[]), page=1, config=config)
+    html = env.get_template(template.name).render(
+        posts=Posts(__root__=[]), page=1, config=config
+    )
     tailwind_content_dir.joinpath(template.name).write_text(html)
-
-

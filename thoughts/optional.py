@@ -4,6 +4,7 @@ import inspect
 
 from pydantic import BaseModel
 
+
 def _optional_import_(
     module: str,
     name: str = None,
@@ -81,7 +82,7 @@ def _optional_import_(
 #         return wrapper
 #     return decorator
 #
-    #
+#
 def optional(*fields):
     def dec(_cls):
         for field in fields:
@@ -93,4 +94,3 @@ def optional(*fields):
         fields = cls.__fields__
         return dec(cls)
     return dec
-

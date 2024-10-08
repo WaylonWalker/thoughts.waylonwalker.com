@@ -8,7 +8,6 @@ from textual.widgets import Footer, Static
 from thoughts.config import config
 
 
-
 class Sidebar(Static):
     def compose(self) -> ComposeResult:
         yield Container(

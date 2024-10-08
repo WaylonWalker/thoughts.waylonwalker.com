@@ -152,7 +152,7 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: Annotated[User, Depends(get_current_user)]
+    current_user: Annotated[User, Depends(get_current_user)],
 ):
     if isinstance(current_user, User):
         if current_user.disabled:
@@ -363,7 +363,7 @@ async def post_signup(
 
 @user_router.get("/users/me/", response_model=User)
 async def read_users_me(
-    current_user: Annotated[User, Depends(try_get_current_active_user)]
+    current_user: Annotated[User, Depends(try_get_current_active_user)],
 ):
     if isinstance(current_user, User):
         return HTMLResponse(f"<p>{current_user.username}</p>")
@@ -395,6 +395,6 @@ async def hash(password: str):
 
 @user_router.get("/users/me/items/")
 async def read_own_items(
-    current_user: Annotated[User, Depends(get_current_active_user)]
+    current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     return [{"item_id": "Foo", "owner": current_user.username}]
