@@ -1,14 +1,24 @@
-default: build tag push set-image
+default: build push set-image
 fresh: create-ns cred convert deploy viz
 update: convert patch
 
 build:
-    podman build -t registry.wayl.one/thoughts -f Dockerfile .
-tag:
-    podman tag registry.wayl.one/thoughts registry.wayl.one/thoughts:$(git rev-parse --short HEAD)
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    version=$(python -c "from thoughts.__about__ import __version__; print(__version__)")
+    podman build \
+       -t registry.wayl.one/thoughts:latest \
+       -t registry.wayl.one/thoughts:$(git rev-parse --short HEAD) \
+       -t registry.wayl.one/thoughts:$version \
+       -f Dockerfile .
 push:
-    podman push registry.wayl.one/thoughts registry.wayl.one/thoughts:$(git rev-parse --short HEAD)
-    podman push registry.wayl.one/thoughts registry.wayl.one/thoughts:latest
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    version=$(python -c "from thoughts.__about__ import __version__; print(__version__)")
+    podman push registry.wayl.one/thoughts:latest
+    podman push registry.wayl.one/thoughts:$version
+    podman push registry.wayl.one/thoughts:$(git rev-parse --short HEAD)
+
 set-image:
     kubectl set image deployment/thoughts --namespace thoughts thoughts=registry.wayl.one/thoughts:$(git rev-parse --short HEAD)
 

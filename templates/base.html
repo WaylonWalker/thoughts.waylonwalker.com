@@ -35,17 +35,17 @@
         {% if self.keywords %}
           <meta name="keywords" content="{{ ','.join(self.keywords) }}" />
         {% endif %}
+        {% if shot_url %}
+          <meta property="og:image" content="https://shots.wayl.one/shot/og.ong?url={{ shot_url|quote_plus }}&height=640&width=1280&scaled_width=1280&scaled_height=640&selectors=" />
+          <meta property="twitter:image" content="https://shots.wayl.one/shot/og.png?url={{ shot_url|quote_plus }}&height=600&width=1200&scaled_width=1200&scaled_height=600&selectors=" content-type='image/png'/>
+        {% else %}
+          <meta property="og:image" content="https://shots.wayl.one/shot/og.png?url={{ request.url|quote_plus }}&height=640&width=1280&scaled_width=1280&scaled_height=640&selectors=" />
+          <meta property="twitter:image" content="https://shots.wayl.one/shot/og.png?url={{ request.url|quote_plus }}&height=600&width=1200&scaled_width=1200&scaled_height=600&selectors=" content-type='image/png'/>
+        {% endif %}
         <meta property="og:image:alt" content="ww thoughts" />
         <meta property="og:image:height" content="640" />
         <meta property="og:image:width" content="1280" />
         <meta property="og:image:type" content="image/png" />
-        {% if shot_url %}
-          <meta property="og:image" content="https://shots.wayl.one/shot/?url={{ shot_url|quote_plus }}&height=640&width=1280&scaled_width=1280&scaled_height=640&selectors=" />
-          <meta property="twitter:image" content="https://shots.wayl.one/shot/?url={{ shot_url|quote_plus }}&height=600&width=1200&scaled_width=1200&scaled_height=600&selectors=" content-type='image/png'/>
-        {% else %}
-          <meta property="og:image" content="https://shots.wayl.one/shot/?url={{ request.url|quote_plus }}&height=640&width=1280&scaled_width=1280&scaled_height=640&selectors=" />
-          <meta property="twitter:image" content="https://shots.wayl.one/shot/?url={{ request.url|quote_plus }}&height=600&width=1200&scaled_width=1200&scaled_height=600&selectors=" content-type='image/png'/>
-        {% endif %}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:site" content="@waylonwalker" />
         <meta property="twitter:creator" content="@waylonwalker" />
