@@ -1,3 +1,7 @@
+## 0.0.3
+
+- fix typo in og images
+
 ## 0.0.2
 
 - try using png og images
