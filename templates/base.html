@@ -31,23 +31,27 @@
       {% block meta %}
         <meta name="og:title" content="{{ self.title() }}" />
         <meta name="og:description" content="{{ self.description() }}" />
-        <meta name="og:image:alt" content="ww thoughts" />
-        <meta name="og:image:height" content="640" />
-        <meta name="og:image:width" content="1280" />
-        <meta name="og:image:type" content="image/png" />
-        {% if shot_url %}
-          <meta name="og:image" content="https://shots.wayl.one/shot/?url={{ shot_url|quote_plus }}&height=640&width=1280&scaled_width=1280&scaled_height=640&selectors=" />
-          <meta name="twitter:image" content="https://shots.wayl.one/shot/?url={{ shot_url|quote_plus }}&height=600&width=1200&scaled_width=1200&scaled_height=600&selectors=" content-type='image/png'/>
-        {% else %}
-          <meta name="og:image" content="https://shots.wayl.one/shot/?url={{ request.url|quote_plus }}&height=640&width=1280&scaled_width=1280&scaled_height=640&selectors=" />
-          <meta name="twitter:image" content="https://shots.wayl.one/shot/?url={{ request.url|quote_plus }}&height=600&width=1200&scaled_width=1200&scaled_height=600&selectors=" content-type='image/png'/>
+
+        {% if self.keywords %}
+          <meta name="keywords" content="{{ ','.join(self.keywords) }}" />
         {% endif %}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@waylonwalker" />
-        <meta name="twitter:creator" content="@waylonwalker" />
-        <meta name="twitter:title" content="{{ self.title() }}" />
-        <meta name="twitter:description" content="{{ self.description() }}" />
-        <meta name="twitter:url" content="{{ request.url }}" />
+        <meta property="og:image:alt" content="ww thoughts" />
+        <meta property="og:image:height" content="640" />
+        <meta property="og:image:width" content="1280" />
+        <meta property="og:image:type" content="image/png" />
+        {% if shot_url %}
+          <meta property="og:image" content="https://shots.wayl.one/shot/?url={{ shot_url|quote_plus }}&height=640&width=1280&scaled_width=1280&scaled_height=640&selectors=" />
+          <meta property="twitter:image" content="https://shots.wayl.one/shot/?url={{ shot_url|quote_plus }}&height=600&width=1200&scaled_width=1200&scaled_height=600&selectors=" content-type='image/png'/>
+        {% else %}
+          <meta property="og:image" content="https://shots.wayl.one/shot/?url={{ request.url|quote_plus }}&height=640&width=1280&scaled_width=1280&scaled_height=640&selectors=" />
+          <meta property="twitter:image" content="https://shots.wayl.one/shot/?url={{ request.url|quote_plus }}&height=600&width=1200&scaled_width=1200&scaled_height=600&selectors=" content-type='image/png'/>
+        {% endif %}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:site" content="@waylonwalker" />
+        <meta property="twitter:creator" content="@waylonwalker" />
+        <meta property="twitter:title" content="{{ self.title() }}" />
+        <meta property="twitter:description" content="{{ self.description() }}" />
+        <meta property="twitter:url" content="{{ request.url }}" />
         {% if DEBUG %}
           {{ hot_reload.script(url_for('hot-reload')) | safe }}
         {% endif %}

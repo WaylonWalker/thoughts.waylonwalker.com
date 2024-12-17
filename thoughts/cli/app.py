@@ -1,17 +1,17 @@
 import typer
 
+from thoughts.cli.api import api_app
 from thoughts.cli.common import verbose_callback
 from thoughts.cli.config import config_app
 from thoughts.cli.tui import tui_app
-from thoughts.cli.api import api_app
 
 app = typer.Typer(
     name="thoughts",
     help="A rich terminal report for coveragepy.",
 )
-app.add_typer(config_app)
-app.add_typer(tui_app)
-app.add_typer(api_app)
+app.add_typer(config_app, name="config")
+app.add_typer(tui_app, name="tui")
+app.add_typer(api_app, name="api")
 
 
 def version_callback(value: bool) -> None:

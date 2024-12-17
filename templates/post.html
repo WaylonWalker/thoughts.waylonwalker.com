@@ -1,5 +1,13 @@
-{% extends 'base.html' %} {% block title %} {{ post.title }} {% endblock %} {%
-block description %} {{ post.message[0:150] }} {% endblock %} {% block content
+{% extends 'base.html' %}
+{% block title %}
+  {{ post.title }}
+{% endblock %}
+{% block description %}
+  {% if post.message is not none %}
+    {{ post.message[0:150] }}
+  {% endif %}
+{% endblock %}
+{% block content
 %}
 
 <nav class='mx-auto container max-w-md m-12 p-4'>
