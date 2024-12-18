@@ -57,11 +57,11 @@
         {% endif %}
       {% endblock %} {% endblock %}
   </head>
-  <body class="mx-auto bg-zinc-800">
+  <body class="mx-auto bg-zinc-950">
     <div class='flex flex-col h-screen justify-between'>
       {% block header %} {% endblock %} {% block content %} {% if posts %}
         <div class='w-full'>
-          <input class="container max-w-4xl form-control m-12 p-4 border shadow-lg border-black bg-zinc-800 rounded mx-auto block"
+          <input class="container max-w-4xl form-control m-12 p-4 border shadow-lg border-black bg-zinc-950 rounded mx-auto block"
                  type="search"
                  name="search"
                  placeholder="Begin Typing To Search Thoughts..."
@@ -76,7 +76,7 @@
       <div>
         <footer class='m-5 text-center text-neutral-400'>
           {% block footer %} &copy; Copyright 2023 by
-            <a class='text-pink-500 hover:underline' href="http://waylonwalker.com">waylonwalker</a>. {% endblock %}
+            <a class='text-pink-500 font-bold underline decoration-cyan-600 hover:decoration-yellow-600 hover:underline' href="http://waylonwalker.com">waylonwalker</a>. {% endblock %}
         </footer>
       </div>
     </body>

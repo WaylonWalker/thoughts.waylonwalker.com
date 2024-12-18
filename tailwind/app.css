@@ -4,7 +4,7 @@
 
 html {
   scroll-behavior: smooth;
-  @apply bg-zinc-800 text-white autofill:bg-yellow-500;
+  @apply bg-zinc-950 text-white autofill:bg-yellow-500;
 }
 
 input:-webkit-autofill,
@@ -27,7 +27,7 @@ select:-webkit-autofill:focus {
 }
 
 ::-webkit-scrollbar-track {
-  @apply rounded rounded-full bg-zinc-900;
+  @apply rounded rounded-full bg-zinc-950;
 }
 
 body::-webkit-scrollbar-track {
@@ -61,7 +61,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .post-body blockquote {
-  @apply m-4 rounded-xl border-l-4 border-l-pink-500 bg-zinc-800 shadow-lg shadow-zinc-900;
+  @apply m-4 rounded-xl border-l-4 border-l-pink-500 bg-zinc-900 shadow-lg shadow-zinc-900;
 }
 
 .post-body h2 {

@@ -1,6 +1,7 @@
 ## 0.0.3
 
 - fix typo in og images
+- darken background for A11y contrast
 
 ## 0.0.2
 

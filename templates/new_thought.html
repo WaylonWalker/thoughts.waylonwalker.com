@@ -1,5 +1,5 @@
 <form
-    class="container m-4 mx-auto flex max-w-screen-md flex-col rounded-lg border border-black bg-zinc-800 p-4 shadow-lg"
+    class="container m-4 mx-auto flex max-w-screen-md flex-col rounded-lg border border-black bg-zinc-900 p-4 shadow-lg"
     id="websiteForm" hx-post="{{ config.root }}/post/" method="POST" name="newPost" hx-target="#posts"
     hx-swap="afterbegin" hx-ext="json-enc">
     <p class="mx-auto mb-4 flex">
@@ -7,21 +7,21 @@
         <a class="h-6 w-6 text-cyan-200" href="/logout" title="logout">{% include 'logout.svg' %}</a>
     </p>
     <label class="mx-auto" for="title">Title:</label>
-    <input class="mx-auto mb-4 w-80 border border-black bg-zinc-900 p-1 focus:bg-zinc-800" type="text" id="title"
-        name="title" required />
+    <input class="mx-auto mb-4 w-80 border border-black bg-zinc-950 p-1 focus:bg-zinc-900" type="text" id="title"
+           name="title" required />
 
     <label class="mx-auto" for="link">Link:</label>
-    <input class="mx-auto mb-4 w-80 border border-black bg-zinc-900 p-1 autofill:bg-yellow-500 focus:bg-zinc-800"
-        type="text" id="link" name="link" value="" />
+    <input class="mx-auto mb-4 w-80 border border-black bg-zinc-950 p-1 autofill:bg-yellow-500 focus:bg-zinc-900"
+           type="text" id="link" name="link" value="" />
 
     <label class="mx-auto" for="tags">Tags:</label>
-    <input class="mx-auto mb-4 w-80 border border-black bg-zinc-900 p-1 focus:bg-zinc-800" type="text" id="tags"
-        name="tags" required />
+    <input class="mx-auto mb-4 w-80 border border-black bg-zinc-950 p-1 focus:bg-zinc-900" type="text" id="tags"
+           name="tags" required />
 
     <label class="mx-auto" for="message">Message:</label>
-    <textarea class="border border-black bg-zinc-900 p-1 focus:bg-zinc-800" id="message" name="message" rows="12"
-        required></textarea>
+    <textarea class="border border-black bg-zinc-950 p-1 focus:bg-zinc-900" id="message" name="message" rows="12"
+              required></textarea>
 
-    <input class="m-4 mx-auto border border-black bg-zinc-900 px-6 py-2 hover:bg-zinc-800" type="submit" value="Submit"
-        id="submit" />
+    <input class="m-4 mx-auto border border-black bg-zinc-950 px-6 py-2 hover:bg-zinc-900" type="submit" value="Submit"
+           id="submit" />
 </form>

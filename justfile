@@ -52,3 +52,6 @@ describe-pod:
 
 logs:
     kubectl logs --all-containers -l io.kompose.service=thoughts -n thoughts -f
+
+tailwind:
+    tailwindcss -i ./tailwind/app.css -o ./static/app.css
