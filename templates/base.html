@@ -11,23 +11,54 @@
         content="{% block description %}Waylon Walker's Thoughts{% endblock %}"
       />
     <!-- <link rel="stylesheet" href="/static/main.css" /> -->
-      <link rel="stylesheet" href="/static/app.css?v={{ config.app_version }}" />
+      <link rel="stylesheet" href="/app.css?v={{ config.app_version }}" />
       <script src="/static/htmx@1.9.4.min.js"></script>
       <script src="/static/json-enc.js"></script>
-
-      <link rel="manifest" href="/static/manifest.json">
       <script>
         if ('serviceWorker' in navigator) {
-          window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).then(function(registration) {
-              console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            }, function(error) {
-              console.log('ServiceWorker registration failed: ', error);
-            });
-          });
+          // Check for kill switch in localStorage
+          const killSwitch = localStorage.getItem('sw_kill');
+          if (killSwitch) {
+            // Remove all service workers and caches
+            navigator.serviceWorker.getRegistrations()
+              .then(registrations => {
+                console.log('Killing service workers:', registrations.length);
+                return Promise.all(
+                  registrations.map(registration => registration.unregister())
+                );
+              })
+              .then(() => caches.keys())
+              .then(cacheNames => Promise.all(
+                cacheNames.map(cacheName => {
+                  console.log('Killing cache:', cacheName);
+                  return caches.delete(cacheName);
+                })
+              ))
+              .then(() => {
+                localStorage.removeItem('sw_kill');
+                console.log('Service worker killed');
+                location.reload();
+              });
+          } else {
+            // Normal service worker registration
+            navigator.serviceWorker.register('/static/service-worker.js?v={{ config.app_version }}')
+              .then(registration => {
+                // Send version to service worker
+                if (registration.active) {
+                  registration.active.postMessage({
+                    type: 'APP_VERSION',
+                    version: '{{ config.app_version }}'
+                  });
+                }
+                // Force update check
+                return registration.update();
+              })
+              .catch(error => console.error('Service worker registration failed:', error));
+          }
         }
       </script>
 
+      <link rel="manifest" href="/static/manifest.json">
       {% block meta %}
         <meta name="og:title" content="{{ self.title() }}" />
         <meta name="og:description" content="{{ self.description() }}" />
@@ -154,9 +185,9 @@
       document.addEventListener('keydown', (e) => {
         // Skip if we're in an input, textarea, or on a post detail page
         if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) ||
-            window.location.pathname.startsWith('/post/')) {
-          return;
-        }
+          window.location.pathname.startsWith('/post/')) {
+            return;
+          }
 
         // Only handle keyboard shortcuts if we're on the posts list page
         if (!window.location.pathname.startsWith('/post/')) {

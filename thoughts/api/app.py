@@ -1,10 +1,13 @@
 import logging
 from pathlib import Path
+import os
 import subprocess
 from urllib.parse import quote_plus
 
+logger = logging.getLogger(__name__)
+
 from diskcache import Cache
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -84,9 +87,13 @@ async def shutdown_event():
         proc.kill()
 
 
-@app.get("/static/app.css")
-async def get_css():
+@app.get("/app.css", include_in_schema=False)
+def get_css(request: Request):
+    """Serve CSS with cache busting query param support"""
     css_path = Path(__file__).parent.parent.parent / "static" / "app.css"
+    if not css_path.exists():
+        # Fallback for Docker environment
+        css_path = Path("/app/static/app.css")
     return FileResponse(css_path, media_type="text/css")
 
 
@@ -115,8 +122,6 @@ app.mount(
     AuthStaticFiles(directory="restricted"),
     name="restricted",
 )
-
-logger = logging.getLogger(__name__)
 
 
 @app.middleware("http")

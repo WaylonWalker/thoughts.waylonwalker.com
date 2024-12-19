@@ -64,6 +64,12 @@
           }
           window.location.href = `/post/${nextId}`;
         }
+      } else if (e.key === 'e') {
+        e.preventDefault();
+        const editButton = document.querySelector('button[title="Edit"]');
+        if (editButton) {
+          editButton.click();
+        }
       }
     });
   }

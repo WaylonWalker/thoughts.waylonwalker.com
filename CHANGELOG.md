@@ -1,3 +1,8 @@
+## 0.0.6
+
+- fix 404 on app.css with version query string
+- fix service worker not correctly busting cache on new versions of site
+
 ## 0.0.5
 
 - hotkeys everywhere
