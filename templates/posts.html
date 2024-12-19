@@ -1,5 +1,5 @@
 {% if page == 1 %}
-    <ul id="posts" class="min-h-screen container m-auto max-w-4xl">
+    <ul id="posts" class="flex-grow container m-auto max-w-4xl flex flex-col min-h-[calc(100vh-8rem)]">
 {% endif %}
 {% for post in posts.__root__ %}
     {% include 'post_item.html' %}

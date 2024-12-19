@@ -9,6 +9,7 @@ from pydantic import BaseModel, BaseSettings, validator
 from sqlalchemy import create_engine
 from sqlmodel import Session
 
+from thoughts.__about__ import __version__
 from thoughts.highlight import highlight_code
 
 
@@ -67,6 +68,7 @@ class Config(BaseSettings):
     litestream_cmd: str = None
     litestream_config: str = None
     root: str = None
+    app_version: str = __version__
     templates = get_templates()
     env: str = None
     # mastodon = get_mastodon()

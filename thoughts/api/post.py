@@ -70,6 +70,13 @@ async def get_post(
     else:
         is_logged_in = True
     if not post:
+        # Get the highest and lowest post IDs
+        highest = session.exec(select(Post).order_by(Post.id.desc()).limit(1)).first()
+        lowest = session.exec(select(Post).order_by(Post.id.asc()).limit(1)).first()
+        
+        if highest and post_id > highest.id:
+            # If requested ID is too high, redirect to first post
+            return RedirectResponse(url=f'/post/{lowest.id}', status_code=302)
         raise HTTPException(status_code=404, detail="Post not found")
     return str(post.message)
 
@@ -90,7 +97,20 @@ async def get_post(
     else:
         is_logged_in = True
     if not post:
+        # Get the highest and lowest post IDs
+        highest = session.exec(select(Post).order_by(Post.id.desc()).limit(1)).first()
+        lowest = session.exec(select(Post).order_by(Post.id.asc()).limit(1)).first()
+        
+        if highest and post_id > highest.id:
+            # If requested ID is too high, redirect to first post
+            return RedirectResponse(url=f'/post/{lowest.id}', status_code=302)
         raise HTTPException(status_code=404, detail="Post not found")
+
+    # Get lowest and highest post IDs for navigation
+    lowest = session.exec(select(Post).order_by(Post.id.asc()).limit(1)).first()
+    highest = session.exec(select(Post).order_by(Post.id.desc()).limit(1)).first()
+    lowest_id = lowest.id if lowest else post_id
+    highest_id = highest.id if highest else post_id
 
     if hx_request:
         return config.templates.TemplateResponse(
@@ -114,6 +134,8 @@ async def get_post(
             "post": post,
             "md": md,
             "is_logged_in": is_logged_in,
+            "lowest_post_id": lowest_id,
+            "highest_post_id": highest_id,
             "current_user": current_user,
             "plain": False,
             "shot_url": str(request.url).replace("/post/", "/post-og/", 1),
@@ -476,7 +498,7 @@ async def get_posts(
 
     if hx_request and page == 1 and len(posts.__root__) == 0:
         return HTMLResponse(
-            '<ul id="posts" class="min-h-screen"><li>No posts</li></ul>'
+            '<ul id="posts" class="flex-grow container m-auto max-w-4xl flex flex-col min-h-[100vh]"><li class="p-4 text-center text-zinc-500 flex-grow flex items-start justify-center">No posts</li></ul>'
         )
     if hx_request and len(posts.__root__) == 0:
         return HTMLResponse("")
@@ -530,7 +552,7 @@ async def get_posts_by_user(
 
     if hx_request and page == 1 and len(posts.__root__) == 0:
         return HTMLResponse(
-            '<ul id="posts" class="min-h-screen"><li>No posts</li></ul>'
+            '<ul id="posts" class="flex-grow container m-auto max-w-4xl flex flex-col min-h-[100vh]"><li class="p-4 text-center text-zinc-500 flex-grow flex items-start justify-center">No posts</li></ul>'
         )
     if hx_request and len(posts.__root__) == 0:
         return HTMLResponse("")
@@ -568,21 +590,6 @@ async def get_posts_by_user(
     return posts
 
 
-class Test(BaseModel):
-    value: Optional[str] = "the value"
-    title: Optional[str] = "the title"
-
-
-@post_router.get("/headers/")
-@htmx
-async def get_headers(request: Request):
-    "get all headers"
-    # return Test(value="test")
-    headers = [f"<li>{key}: {value}</li>" for key, value in request.headers.items()]
-    body = '<ul id="headers">headers</ul>'
-    return HTMLResponse(body)
-
-
 @post_router.post("/search/")
 async def search_posts(
     *,
@@ -592,8 +599,6 @@ async def search_posts(
     hx_request: Annotated[str | None, Header()] = None,
     accept: Annotated[str | None, Header()] = None,
     current_user: Annotated[User, Depends(try_get_current_active_user)],
-    # page_size: int = 10,
-    # page: int = 1,
 ) -> Posts:
     "get all posts"
     page_size = 999999
@@ -629,7 +634,7 @@ async def search_posts(
 
     if hx_request and page == 1 and len(posts.__root__) == 0:
         return HTMLResponse(
-            '<ul id="posts" class="min-h-screen"><li>No posts</li></ul>'
+            '<ul id="posts" class="flex-grow container m-auto max-w-4xl flex flex-col min-h-[100vh]"><li class="p-4 text-center text-zinc-500 flex-grow flex items-start justify-center">No posts</li></ul>'
         )
     if hx_request and len(posts.__root__) == 0:
         return HTMLResponse("")
@@ -666,3 +671,18 @@ async def search_posts(
         )
 
     return posts
+
+
+class Test(BaseModel):
+    value: Optional[str] = "the value"
+    title: Optional[str] = "the title"
+
+
+@post_router.get("/headers/")
+@htmx
+async def get_headers(request: Request):
+    "get all headers"
+    # return Test(value="test")
+    headers = [f"<li>{key}: {value}</li>" for key, value in request.headers.items()]
+    body = '<ul id="headers">headers</ul>'
+    return HTMLResponse(body)

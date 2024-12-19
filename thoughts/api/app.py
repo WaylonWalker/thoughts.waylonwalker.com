@@ -1,35 +1,26 @@
-import asyncio
-import base64
-import hashlib
 import logging
-import os
-import subprocess
-import tempfile
 from pathlib import Path
+import subprocess
 from urllib.parse import quote_plus
 
-import httpx
 from diskcache import Cache
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import (
-    HTMLResponse,
-    RedirectResponse,
-    Response,
-    StreamingResponse,
-)
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from starlette.background import BackgroundTask
+import httpx
 from starlette.requests import Request
-from starlette.responses import StreamingResponse
 
 from thoughts.api.post import post_router
-from thoughts.api.user import User, try_get_current_active_user, user_router
+from thoughts.api.user import try_get_current_active_user, user_router
 from thoughts.config import config
 
 cache = Cache("cache", size_limit=0.5 * (2**30))
-app = FastAPI()
+app = FastAPI(
+    title="thoughts",
+    description="thoughts",
+    version=config.app_version,
+)
 httpx_client = httpx.AsyncClient(timeout=30.0)
 
 # ACCESS_KEY = os.environ.get("ACCESS_KEY")
@@ -91,6 +82,12 @@ async def start_litestream():
 async def shutdown_event():
     for proc in PROCS.values():
         proc.kill()
+
+
+@app.get("/static/app.css")
+async def get_css():
+    css_path = Path(__file__).parent.parent.parent / "static" / "app.css"
+    return FileResponse(css_path, media_type="text/css")
 
 
 app.include_router(post_router)
@@ -168,9 +165,6 @@ async def handle_share(
     </html>
     """
     return HTMLResponse(content=content)
-
-
-from fastapi.responses import FileResponse
 
 
 @app.get("/favicon.ico", response_class=FileResponse)

@@ -1,6 +1,16 @@
+## 0.0.5
+
+- hotkeys everywhere
+  - / for search
+  - j for previous
+  - k for next
+
+![screenshot-2024-12-19T16-57-11-507Z.png](https://dropper.wayl.one/api/file/80c08831-eb70-46d8-a634-67078fedc682.webp)
+
 ## 0.0.4
 
 - edit thought modal!
+- empty thoughts list no longer causes the page to move
 
 ### before
 

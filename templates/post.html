@@ -21,4 +21,51 @@
 <ul id="posts" class="min-h-screen m-auto container max-w-4xl">
   {% include 'post_item.html' %}
 </ul>
+
+<script>
+  // Only run this script on post detail pages
+  if (window.location.pathname.startsWith('/post/')) {
+    // Store the current post's ID
+    const currentId = parseInt(window.location.pathname.split('/').pop());
+    // Store the lowest and highest IDs from the backend
+    const lowestId = {{ lowest_post_id }};
+    const highestId = {{ highest_post_id }};
+    
+    document.addEventListener('keydown', (e) => {
+      // Only trigger if not in an input/textarea
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        // If help modal is open, close it instead of navigating
+        if (isHelpModalOpen) {
+          toggleHelpModal();
+        } else {
+          window.location.href = '/';
+        }
+      } else if (e.key === 'j' || e.key === 'k') {
+        e.preventDefault();
+        if (!isNaN(currentId)) {
+          let nextId;
+          if (e.key === 'j') {
+            // Going down to older posts
+            nextId = currentId - 1;
+            if (nextId < lowestId) {
+              nextId = highestId; // Wrap to newest post
+            }
+          } else {
+            // Going up to newer posts
+            nextId = currentId + 1;
+            if (nextId > highestId) {
+              nextId = lowestId; // Wrap to oldest post
+            }
+          }
+          window.location.href = `/post/${nextId}`;
+        }
+      }
+    });
+  }
+</script>
 {% endblock %}
