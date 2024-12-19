@@ -1,38 +1,64 @@
-<h2 class="m-4 mx-10 text-2xl font-bold">Edit Thought</h2>
-<form class="m-4 mx-auto mb-6 flex w-80 flex-col rounded-lg bg-zinc-900 p-4 shadow-xl shadow-neutral-900"
-      id="websiteForm" hx-patch="{{ config.root }}/post/html/" method="POST" name="newPost"
-      hx-target="#post-{{ post.id }}" hx-swap="outerHTML">
-    <div class="flex w-full justify-center">
-        <p>Author: {{ current_user.username }}</p>
-        <a class="h-6 w-6 text-cyan-200" href="/logout" title="logout">
-            {% include 'logout.svg' %}
-        </a>
-        <input type="hidden" id="id" name="id" required readonly value="{{ post.id }}" />
+<div id="modal-container">
+    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Background backdrop -->
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm"></div>
+
+        <!-- Modal panel -->
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="relative w-full max-w-4xl transform rounded-xl bg-zinc-900 p-6 shadow-2xl transition-all">
+                <h2 class="mb-6 text-2xl font-bold">Edit Thought</h2>
+                <form id="websiteForm" 
+                      hx-patch="{{ config.root }}/post/html/" 
+                      method="POST" 
+                      name="newPost"
+                      hx-target="#post-{{ post.id }}" 
+                      hx-swap="outerHTML"
+                      hx-on::after-request="document.getElementById('modal-container').innerHTML = ''">
+                    <div class="mb-6 flex w-full items-center justify-between">
+                        <p class="text-lg">Author: {{ current_user.username }}</p>
+                        <a class="h-6 w-6 text-cyan-200" href="/logout" title="logout">
+                            {% include 'logout.svg' %}
+                        </a>
+                        <input type="hidden" id="id" name="id" required readonly value="{{ post.id }}" />
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="mb-2 block text-lg" for="title">Title</label>
+                        <input class="w-full rounded-lg border border-black bg-zinc-950 p-3 focus:bg-zinc-900" 
+                               type="text" id="title" name="title" required value="{{ post.title }}" />
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="mb-2 block text-lg" for="link">Link</label>
+                        <input class="w-full rounded-lg border border-black bg-zinc-950 p-3 autofill:bg-yellow-500 focus:bg-zinc-900"
+                               type="text" id="link" name="link" value="{{ post.link }}" />
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="mb-2 block text-lg" for="tags">Tags</label>
+                        <input class="w-full rounded-lg border border-black bg-zinc-950 p-3 focus:bg-zinc-900" 
+                               type="text" id="tags" name="tags" required value="{{ post.tags }}" />
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="mb-2 block text-lg" for="message">Message</label>
+                        <textarea class="min-h-[300px] w-full rounded-lg border border-black bg-zinc-950 p-3 focus:bg-zinc-900" 
+                                  id="message" name="message" required>{{ post.message }}</textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-4">
+                        <button class="rounded-lg border border-black bg-zinc-950 px-6 py-3 text-lg hover:bg-zinc-900" 
+                                type="button"
+                                onclick="document.getElementById('modal-container').innerHTML = ''">
+                            Cancel
+                        </button>
+                        <button class="rounded-lg border border-pink-500 bg-pink-500 px-6 py-3 text-lg font-semibold text-white hover:bg-pink-600" 
+                                type="submit">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <label class="mx-auto" for="title">Title:</label>
-    <input class="mx-8 mb-4 border border-black bg-zinc-950 p-1 text-center focus:bg-zinc-900" type="text" id="title"
-           name="title" required value="{{ post.title }}" />
-
-    <label class="mx-auto" for="link">Link:</label>
-    <input class="mx-8 mb-4 border border-black bg-zinc-950 p-1 text-center autofill:bg-yellow-500 focus:bg-zinc-900"
-           type="text" id="link" name="link" value="{{ post.link }}" />
-
-    <label class="mx-auto" for="tags">Tags:</label>
-    <input class="mx-8 mb-4 border border-black bg-zinc-950 p-1 text-center focus:bg-zinc-900" type="text" id="tags"
-           name="tags" required value="{{ post.tags }}" />
-
-    <label class="mx-auto" for="message">Message:</label>
-    <textarea class="border border-black bg-zinc-950 p-1 focus:bg-zinc-900" id="message" name="message" rows="4"
-              required>
-        {{ post.message }}</textarea>
-
-    <div class="flex">
-        <input class="m-4 mx-auto border border-black bg-zinc-950 px-6 py-2 hover:bg-zinc-900" type="submit"
-               value="Submit" id="submit" />
-        <!-- cancel button -->
-        <button class="m-4 mx-auto border border-black bg-zinc-950 px-6 py-2 hover:bg-zinc-900" type="button"
-                hx-get="{{ config.root }}/post/{{ post.id }}" hx-swap="outerHTML" hx-target="#post-{{ post.id }}">
-            Cancel
-        </button>
-    </div>
-</form>
+</div>

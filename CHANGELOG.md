@@ -1,3 +1,15 @@
+## 0.0.4
+
+- edit thought modal!
+
+### before
+
+![screenshot-2024-12-19T00-58-43-976Z.png](https://dropper.wayl.one/api/file/fe60b579-18d3-450e-87e2-2f5664f32210.webp)
+
+### after
+
+![screenshot-2024-12-19T00-59-21-503Z.png](https://dropper.wayl.one/api/file/c560e113-66c1-4532-9eb7-c75eb6d3aaf3.webp)
+
 ## 0.0.3
 
 - fix typo in og images
