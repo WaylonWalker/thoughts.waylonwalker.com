@@ -12,13 +12,15 @@
            name="search"
            placeholder="Begin Typing To Search Thoughts..."
            hx-post="/search/"
-           hx-trigger="keyup changed throttle:100ms search"
+           hx-trigger="keyup throttle:100ms, search"
            hx-target="#posts"
            hx-swap='outerHTML'
     >
   </div>
+
   <div
     id="posts"
+    class='min-h-screen'
     hx-get="/posts/"
     hx-target="#posts"
     hx-swap="outerHTML"
