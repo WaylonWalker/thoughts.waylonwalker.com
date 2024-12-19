@@ -215,8 +215,10 @@
             e.preventDefault();
             if (selectedPostIndex !== -1) {
               const selectedPost = posts[selectedPostIndex];
-              const postId = selectedPost.id.split('-')[1];
-              window.location.href = `/edit/${postId}`;
+              const editButton = selectedPost.querySelector('button[title="Edit"]');
+              if (editButton) {
+                editButton.click();
+              }
             }
           } else if (e.key === 'Enter') {
             e.preventDefault();

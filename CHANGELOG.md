@@ -1,3 +1,7 @@
+## 0.0.7
+
+- fix edit button on index page going to the post instead of editing the post
+
 ## 0.0.6
 
 - fix 404 on app.css with version query string
