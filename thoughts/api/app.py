@@ -7,14 +7,15 @@ from urllib.parse import quote_plus
 logger = logging.getLogger(__name__)
 
 from diskcache import Cache
-from fastapi import FastAPI, File, Form, UploadFile, HTTPException
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 import httpx
 from starlette.requests import Request
-
-from thoughts.api.post import post_router
+from sqlalchemy.orm import Session
+from sqlmodel import select
+from thoughts.api.post import post_router, get_session, Posts, Post, md
 from thoughts.api.user import try_get_current_active_user, user_router
 from thoughts.config import config
 
@@ -145,9 +146,38 @@ app.add_middleware(
 
 
 @app.get("/")
-async def get(request: Request, response_class=HTMLResponse):
+async def get(
+    request: Request,
+    current_user=Depends(try_get_current_active_user),
+    session: Session = Depends(get_session),
+    response_class=HTMLResponse
+):
+    statement = (
+        select(Post)
+        .where(Post.published)
+        .order_by(Post.id.desc())
+        .limit(10)
+    )
+    posts = session.exec(statement).all()
+    posts = Posts(__root__=posts)
+
+    if isinstance(current_user, RedirectResponse):
+        is_logged_in = False
+    else:
+        is_logged_in = True
+
     return config.templates.TemplateResponse(
-        "index.html", {"request": request, "config": config}
+        "index.html",
+        {
+            "request": request,
+            "config": config,
+            "current_user": current_user,
+            "posts": posts,
+            "md": md,
+            "is_logged_in": is_logged_in,
+            "page": 1,
+            "page_size": 10
+        }
     )
 
 

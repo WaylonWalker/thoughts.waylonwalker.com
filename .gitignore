@@ -963,3 +963,14 @@ database.db
 memory
 database-local.db
 database.pre.db
+.database.db-litestream
+.prod-database.db-litestream
+database
+database-1.db
+database.db.tmp-shm
+database.db.tmp-wal
+token
+cache
+.installer
+database.db-shm
+database.db-wal

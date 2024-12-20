@@ -10,17 +10,11 @@
 {% block content
 %}
 
-<nav class='mx-auto container max-w-md m-12 p-4'>
-  <ul class="flex justify-center">
-    <li>
-      <a class="text-lg text-pink-500 hover:underline font-bold" href="/">Thoughts-Home</a>
-    </li>
-  </ul>
-</nav>
-<p class='text-xl font-thin max-w-lg my-12 mx-auto'> You found my thought's a collection of short posts generally tied to a link on the web and written through a small chrome extension. See full posts on <a href='https://waylonwalker.com' class='text-pink-500 font-normal'>waylonwalker.com</a> </p>
-<ul id="posts" class="min-h-screen m-auto container max-w-4xl">
+<ul id="posts" class="m-auto container max-w-4xl">
   {% include 'post_item.html' %}
 </ul>
+
+<p class='text-xl font-thin max-w-lg my-12 mx-auto'> You found my thought's a collection of short posts generally tied to a link on the web and written through a small chrome extension. See full posts on <a href='https://waylonwalker.com' class='text-pink-500 font-normal'>waylonwalker.com</a> </p>
 
 <script>
   // Only run this script on post detail pages
@@ -30,7 +24,7 @@
     // Store the lowest and highest IDs from the backend
     const lowestId = {{ lowest_post_id }};
     const highestId = {{ highest_post_id }};
-    
+
     document.addEventListener('keydown', (e) => {
       // Only trigger if not in an input/textarea
       if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {

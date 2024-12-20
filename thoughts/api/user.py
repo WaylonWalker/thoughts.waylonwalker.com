@@ -124,31 +124,39 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    
+    # First try session cookie
     if session is not None:
         try:
-            payload = jwt.decode(session, SECRET_KEY)
+            payload = jwt.decode(session, SECRET_KEY, algorithms=[ALGORITHM])
             username: str = payload.get("sub")
             if username is None:
                 raise credentials_exception
             token_data = TokenData(username=username)
+            user = get_user(token_data.username)
+            if user is None:
+                raise credentials_exception
+            return user
         except Exception:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Invalid authentication"
-            )
-    else:
+            # If session cookie fails, fall back to token
+            pass
+    
+    # Try bearer token
+    if token is not None:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             username: str = payload.get("sub")
             if username is None:
                 raise credentials_exception
             token_data = TokenData(username=username)
+            user = get_user(token_data.username)
+            if user is None:
+                raise credentials_exception
+            return user
         except JWTError:
             raise credentials_exception
-
-    # user = authenticate_user(token_data.username, token_data.password)
-
-    user = get_user(token_data.username)
-    return user
+    
+    raise credentials_exception
 
 
 async def get_current_active_user(
@@ -164,6 +172,7 @@ async def try_get_current_active_user(
     request: Request,
     hx_request: Annotated[str | None, Header()] = None,
 ):
+    """Try to get the current active user, return None if not authenticated"""
     try:
         session = await cookie_sec(request)
     except starlette.exceptions.HTTPException:
@@ -185,19 +194,14 @@ async def try_get_current_active_user(
             user = authenticate_user(username, password)
             return user
 
-    if token is None and session is None and hx_request:
-        return config.templates.TemplateResponse(
-            "login_form.html",
-            {"request": request, "config": config, "error": "Not authenticated"},
-        )
-    if token is None and session is None:
-        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+        return None
 
     try:
         current_user = await get_current_user(token, session)
-        return await get_current_active_user(current_user)
+        active_user = await get_current_active_user(current_user)
+        return active_user
     except HTTPException:
-        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+        return None
 
 
 @user_router.post("/token", response_model=Token)
@@ -229,6 +233,15 @@ async def get_login(
         )
     return config.templates.TemplateResponse(
         "login.html", {"request": request, "config": config}
+    )
+
+
+@user_router.get("/login-modal/", response_class=HTMLResponse)
+async def get_login_modal(request: Request, signup: bool = False):
+    """Get the login modal"""
+    return config.templates.TemplateResponse(
+        "login_modal.html",
+        {"request": request, "config": config, "signup": signup},
     )
 
 
@@ -268,32 +281,38 @@ async def post_login(
             },
         )
 
-    if not user and hx_request:
-        return config.templates.TemplateResponse(
-            "login_form.html",
-            {"request": request, "config": config, "error": "Not authenticated"},
-        )
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    response = config.templates.TemplateResponse(
-        "hx_get_new_thought.html",
-        {
-            "request": request,
-            "config": config,
-        },
+    
+    # Handle HTMX request
+    if hx_request:
+        response = config.templates.TemplateResponse(
+            "new_thought_modal.html",
+            {
+                "request": request,
+                "config": config,
+                "current_user": user,
+            },
+        )
+    else:
+        response = RedirectResponse(url="/", status_code=303)
+    
+    # Set cookie with proper domain and expiration
+    expires = datetime.now(timezone.utc) + timedelta(days=30)
+    host = request.headers.get("host", "").split(":")[0]  # Get host without port
+    
+    response.set_cookie(
+        key=SESSION_NAME,
+        value=access_token,
+        httponly=True,
+        secure=False,  # Set to True if using HTTPS
+        samesite='lax',
+        expires=expires.timestamp(),
+        path='/',
+        domain=host if host != "localhost" else None,  # Set domain for IP but not localhost
     )
-
-    expires = (datetime.utcnow() + timedelta(weeks=52)).replace(tzinfo=timezone.utc)
-    response.set_cookie(SESSION_NAME, access_token, expires=expires)
     return response
 
 
@@ -305,59 +324,61 @@ async def get_signup(
     return {}
 
 
-@user_router.post("/signup")
-async def post_signup(
+@user_router.post("/signup", response_class=HTMLResponse)
+async def signup(
     request: Request,
-    user: UserCreate = Depends(UserCreate.as_form),
-    # form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    # form_data: Annotated[UserCreate, Depends()],
-    session: Session = Depends(get_session),
-    hx_request: Annotated[str | None, Header()] = None,
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
 ):
-    db_user = User.from_orm(user)
-    existing = session.exec(select(User).where(User.username == user.username)).first()
-    existing_email = session.exec(select(User).where(User.email == user.email)).first()
-
-    if (existing is not None or existing_email is not None) and hx_request:
+    """Sign up a new user"""
+    if password != confirm_password:
         return config.templates.TemplateResponse(
-            "signup_partial.html",
-            {"request": request, "config": config, "error": "username already exists"},
-        )
-    if existing is not None or existing_email is not None:
-        return config.templates.TemplateResponse(
-            "signup.html",
-            {"request": request, "config": config, "error": "username already exists"},
-        )
-    session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
-
-    if not user and hx_request:
-        return config.templates.TemplateResponse(
-            "login_form.html",
-            {"request": request, "config": config, "error": "Not authenticated"},
+            "login_modal.html",
+            {
+                "request": request,
+                "config": config,
+                "signup": True,
+                "error": "Passwords do not match",
+            },
         )
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
+    # Check if username exists
+    user = get_user(username)
+    if user:
+        return config.templates.TemplateResponse(
+            "login_modal.html",
+            {
+                "request": request,
+                "config": config,
+                "signup": True,
+                "error": "Username already exists",
+            },
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    # Create user
+    db_session = next(get_session())
+    new_user = User(username=username, email=email, hashed_password=get_password_hash(password))
+    db_session.add(new_user)
+    db_session.commit()
+    db_session.refresh(new_user)
+    
+    # Log them in
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": username},
     )
-    response = config.templates.TemplateResponse(
-        "hx_get_new_thought.html",
-        {
-            "request": request,
-            "config": config,
-        },
+    response = RedirectResponse(
+        url="/",
+        status_code=status.HTTP_302_FOUND,
     )
-
-    expires = (datetime.utcnow() + timedelta(weeks=52)).replace(tzinfo=timezone.utc)
-    response.set_cookie(SESSION_NAME, access_token, expires=expires)
+    response.set_cookie(
+        SESSION_NAME,
+        access_token,
+        httponly=True,
+        secure=False,  # Set to True if using HTTPS
+        samesite="lax",
+    )
     return response
 
 
@@ -398,3 +419,22 @@ async def read_own_items(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     return [{"item_id": "Foo", "owner": current_user.username}]
+
+
+@user_router.get("/new-thought/")
+async def get_new_thought(
+    request: Request,
+    current_user: Annotated[User, Depends(try_get_current_active_user)],
+    hx_request: Annotated[str | None, Header()] = None,
+):
+    if isinstance(current_user, User):
+        return config.templates.TemplateResponse(
+            "new_thought_modal.html",
+            {"request": request, "config": config, "current_user": current_user},
+        )
+    if hx_request:
+        return config.templates.TemplateResponse(
+            "login_form.html", {"request": request, "config": config}
+        )
+    # For non-HTMX requests, redirect to login page
+    return RedirectResponse(url=config.root + "/login", status_code=302)

@@ -1,3 +1,8 @@
+## 0.0.8
+
+- new post is now a modal
+- login is a modal
+
 ## 0.0.7
 
 - fix edit button on index page going to the post instead of editing the post

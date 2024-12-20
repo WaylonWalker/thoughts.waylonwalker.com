@@ -1,0 +1,24 @@
+<div id="modal-backdrop" class="fixed inset-0 z-50">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="relative w-full max-w-4xl transform rounded-xl bg-zinc-900 p-6 shadow-2xl transition-all">
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div class="w-full max-w-lg bg-zinc-900 p-8 rounded-lg shadow-xl border border-zinc-700">
+                    <div class="text-center mb-6">
+                        {% if signup %}
+                        <h2 class="text-2xl font-bold text-cyan-500 mb-2">Create Account</h2>
+                        <p class="text-zinc-300">Join to start sharing your thoughts.</p>
+                        {% else %}
+                        <h2 class="text-2xl font-bold text-cyan-500 mb-2">Welcome Back</h2>
+                        <p class="text-zinc-300">Login to create and manage your thoughts.</p>
+                        {% endif %}
+                    </div>
+                    {% if signup %}
+                        {% include "signup_form.html" %}
+                    {% else %}
+                        {% include "login_form.html" %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

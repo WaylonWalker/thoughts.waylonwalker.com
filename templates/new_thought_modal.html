@@ -1,0 +1,139 @@
+<div id="modal-container">
+    <div class="fixed inset-0 z-50 overflow-y-auto"
+         aria-labelledby="modal-title"
+         role="dialog"
+         aria-modal="true"
+         hx-on::after-settle="document.getElementById('link').focus()">
+        <!-- Background backdrop -->
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm"></div>
+
+        <!-- Modal panel -->
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="relative w-full max-w-4xl transform rounded-xl bg-zinc-900 p-6 shadow-2xl transition-all">
+                {% if not current_user %}
+                    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <div class="w-full max-w-lg bg-zinc-900 p-8 rounded-lg shadow-xl border border-zinc-700">
+                            <div class="text-center mb-6">
+                                <h2 class="text-2xl font-bold text-pink-500 mb-2">Login Required</h2>
+                                <p class="text-zinc-300">Please log in to create a new thought and fetch page titles.</p>
+                            </div>
+                            {% include "login_form.html" %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <div class="w-full max-w-lg bg-zinc-900 p-8 rounded-lg shadow-xl border border-zinc-700">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-2xl font-bold text-pink-500">New Thought</h2>
+                                <button onclick="document.getElementById('modal-container').innerHTML = ''" class="text-zinc-400 hover:text-zinc-200">&times;</button>
+                            </div>
+                            <form id="websiteForm"
+                                  hx-post="{{ get_base_url(request) }}/post/"
+                                  method="POST"
+                                  name="newPost"
+                                  hx-target="#posts"
+                                  hx-swap="afterbegin"
+                                  hx-ext="json-enc"
+                                  hx-on::after-request="document.getElementById('modal-container').innerHTML = ''">
+                                <div class="mb-6 flex w-full items-center justify-between">
+                                    <p class="text-lg">Author: {{ current_user.username }}</p>
+                                    <a class="h-6 w-6 text-cyan-200" href="/logout" title="logout">
+                                        {% include 'logout.svg' %}
+                                    </a>
+                                </div>
+
+                                <div class="mb-6">
+                                    <label class="mb-2 block text-lg" for="link">Link</label>
+                                    <input class="w-full rounded-lg border border-black bg-zinc-950 p-3 autofill:bg-yellow-500 focus:bg-zinc-900"
+                                           type="text" id="link" name="link" autofocus />
+                                </div>
+
+                                <div class="mb-6">
+                                    <label class="mb-2 block text-lg" for="title">Title</label>
+                                    <input id="title-input" class="w-full rounded-lg border border-black bg-zinc-950 p-3 focus:bg-zinc-900"
+                                           type="text" name="title" required />
+                                </div>
+
+                                <div class="mb-6">
+                                    <label class="mb-2 block text-lg" for="tags">Tags</label>
+                                    <input class="w-full rounded-lg border border-black bg-zinc-950 p-3 focus:bg-zinc-900"
+                                           type="text" id="tags" name="tags" required />
+                                </div>
+
+                                <div class="mb-6">
+                                    <label class="mb-2 block text-lg" for="message">Message</label>
+                                    <textarea class="min-h-[300px] w-full rounded-lg border border-black bg-zinc-950 p-3 focus:bg-zinc-900"
+                                              id="message" name="message" required></textarea>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+                                    <div class="text-xs text-zinc-400 flex flex-wrap gap-2">
+                                        <kbd class="rounded border border-zinc-700 px-1.5 py-0.5">Esc</kbd>
+                                        <span class="text-zinc-500">cancel</span>
+                                        <span class="hidden sm:inline text-zinc-500">•</span>
+                                        <div class="flex items-center gap-1">
+                                            <kbd class="rounded border border-zinc-700 px-1.5 py-0.5">Ctrl</kbd>
+                                            <span class="text-zinc-500">+</span>
+                                            <kbd class="rounded border border-zinc-700 px-1.5 py-0.5">Enter</kbd>
+                                            <span class="text-zinc-500">save</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="rounded-lg border border-black bg-zinc-950 px-4 py-2 text-sm hover:bg-zinc-900"
+                                                type="button"
+                                                onclick="document.getElementById('modal-container').innerHTML = ''">
+                                            Cancel
+                                        </button>
+                                        <button class="rounded-lg border border-pink-500 bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600"
+                                                type="submit">
+                                            Create Thought
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const linkInput = document.getElementById('link');
+    const fetchTitle = (url) => {
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+            console.log('Fetching title for:', url);
+            fetch(`{{ get_base_url(request) }}/fetch-title/?url=${encodeURIComponent(url)}`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.text();
+                })
+                .then(html => {
+                    console.log('Received HTML:', html);
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const newInput = tempDiv.querySelector('input');
+                    if (newInput && newInput.value) {
+                        document.getElementById('title-input').value = newInput.value;
+                    }
+                })
+                .catch(error => console.error('Error fetching title:', error));
+        }
+    };
+
+    if (linkInput) {
+        linkInput.addEventListener('change', e => fetchTitle(e.target.value));
+        linkInput.addEventListener('blur', e => fetchTitle(e.target.value));
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('modal-container').innerHTML = '';
+        }
+        if (e.key === 'Enter' && e.ctrlKey) {
+            e.preventDefault();
+            htmx.trigger('#websiteForm', 'submit');
+        }
+    });
+</script>

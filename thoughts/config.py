@@ -1,13 +1,13 @@
-import os
-from pathlib import Path
-from urllib.parse import quote_plus
-
+from fastapi import Request
 from fastapi.templating import Jinja2Templates
 from markdown_it import MarkdownIt
 from mastodon import Mastodon
-from pydantic import BaseModel, BaseSettings, validator
+import os
+from pathlib import Path
+from pydantic import BaseModel, BaseSettings, Field, validator
 from sqlalchemy import create_engine
 from sqlmodel import Session
+from urllib.parse import quote_plus
 
 from thoughts.__about__ import __version__
 from thoughts.highlight import highlight_code
@@ -41,9 +41,32 @@ class ApiServer(BaseModel):
             return True
 
 
+def get_base_url(request: Request) -> str:
+    """Get the base URL based on the request host
+
+    For localhost/local IPs, return empty string (relative URLs)
+    For production domain, return the full URL with protocol
+    """
+    host = request.headers.get("host", "").split(":")[0]
+
+    # Check if it's localhost or local IP
+    if (
+        host == "localhost"
+        or host.startswith("127.")
+        or host.startswith("192.168.")
+        or host.startswith("10.")
+    ):
+        return ""
+
+    # Production domain
+    protocol = "https" if request.url.scheme == "https" else "http"
+    return f"{protocol}://{request.headers['host']}"
+
+
 def get_templates():
     templates = Jinja2Templates(directory="templates")
     templates.env.filters["quote_plus"] = lambda u: quote_plus(str(u))
+    templates.env.globals["get_base_url"] = get_base_url
     return templates
 
 
@@ -62,16 +85,34 @@ def get_mastodon():
     return mastodon
 
 
+def get_local_ip():
+    import socket
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't need to be reachable
+        s.connect(("10.255.255.255", 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = "127.0.0.1"
+    finally:
+        s.close()
+    return IP
+
+
 class Config(BaseSettings):
     api_server: ApiServer = ApiServer()
+    site_name: str = "Thoughts"
     database_url: str = None
     litestream_cmd: str = None
     litestream_config: str = None
-    root: str = None
+    templates: Jinja2Templates = Field(default_factory=get_templates)
+    root: str = Field(default="")
     app_version: str = __version__
-    templates = get_templates()
     env: str = None
-    # mastodon = get_mastodon()
+
+    class Config:
+        env_file = ".env"
 
     @property
     def md(self):
@@ -117,12 +158,9 @@ class Config(BaseSettings):
 
     @validator("root")
     def validate_root(cls, v):
-        if v is not None:
-            return v
-        if "FLY_MACHINE_ID" in os.environ:
-            return "https://thoughts.waylonwalker.com"
-        else:
-            return "http://localhost:5000"
+        if v is None:
+            return f"http://{get_local_ip()}:5000"
+        return v
 
 
 class Database:

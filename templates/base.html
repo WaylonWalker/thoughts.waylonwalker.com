@@ -95,14 +95,40 @@
       <div class="relative bg-zinc-900/90 backdrop-blur-sm p-8 rounded-lg shadow-xl max-w-lg w-full mx-4 border border-zinc-700">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-2xl font-bold text-pink-500">Keyboard Shortcuts</h2>
-          <button onclick="toggleHelpModal()" class="text-zinc-400 hover:text-zinc-200 text-2xl leading-none">&times;</button>
+          <button onclick="toggleHelpModal()" class="text-zinc-400 hover:text-zinc-200">&times;</button>
         </div>
-        <div id="help-content" class="relative">
-          <!-- Content will be dynamically inserted based on context -->
-        </div>
+        <div id="help-content"></div>
       </div>
     </div>
     <div class='flex flex-col min-h-screen'>
+      <header class="flex items-center justify-between p-4 border-b border-cyan-700">
+        <div>
+          <a href="/" class="text-cyan-500 hover:text-cyan-400 font-bold text-lg">
+            {{ config.site_name }}
+          </a>
+        </div>
+        {% if current_user %}
+          <button
+            class="rounded-lg border border-pink-500 bg-pink-500 px-4 py-2 text-white hover:bg-pink-600"
+            hx-get="{{ get_base_url(request) }}/new-thought/"
+            hx-target="#modal-container"
+            hx-swap="innerHTML"
+            hx-trigger="click"
+          >
+            New Thought
+          </button>
+        {% else %}
+          <button
+            class="rounded-lg border border-cyan-500 bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-600"
+            hx-get="{{ get_base_url(request) }}/login-modal/"
+            hx-target="#modal-container"
+            hx-swap="innerHTML"
+            hx-trigger="click"
+          >
+            Login
+          </button>
+        {% endif %}
+      </header>
       <main class="flex-grow flex flex-col min-h-[calc(100vh-8rem)]">
         {% block header %} {% endblock %}
         {% block content %}
@@ -170,13 +196,17 @@
         }
         // Focus message textarea when edit modal is loaded
         if (evt.detail.target.id === 'modal-container') {
-          const messageTextarea = evt.detail.target.querySelector('textarea[name="message"]');
-          if (messageTextarea) {
-            setTimeout(() => {
-              messageTextarea.focus();
-              // Set cursor at end of text
-              messageTextarea.setSelectionRange(messageTextarea.value.length, messageTextarea.value.length);
-            }, 50); // Small delay to ensure modal is fully rendered
+          const form = evt.detail.target.querySelector('form');
+          // Only auto-focus message for edit forms, not new thought
+          if (form && form.getAttribute('hx-patch')) {
+            const messageTextarea = form.querySelector('textarea[name="message"]');
+            if (messageTextarea) {
+              setTimeout(() => {
+                messageTextarea.focus();
+                // Set cursor at end of text
+                messageTextarea.setSelectionRange(messageTextarea.value.length, messageTextarea.value.length);
+              }, 50); // Small delay to ensure modal is fully rendered
+            }
           }
         }
       });
@@ -226,6 +256,12 @@
               const selectedPost = posts[selectedPostIndex];
               const postId = selectedPost.id.split('-')[1];
               window.location.href = `/post/${postId}`;
+            }
+          } else if (e.key === 'n') {
+            e.preventDefault();
+            const newButton = document.querySelector('button[hx-get*="/new-thought/"]');
+            if (newButton) {
+              newButton.click();
             }
           }
         }
@@ -301,7 +337,10 @@
               <h3 class="text-lg font-semibold text-cyan-500 mb-2">Actions</h3>
               <ul class="space-y-2 text-zinc-300">
                 <li><kbd class="bg-zinc-800 px-2 py-1 rounded">/</kbd> Focus search</li>
+                {% if current_user %}
                 <li><kbd class="bg-zinc-800 px-2 py-1 rounded">e</kbd> Edit selected post</li>
+                <li><kbd class="bg-zinc-800 px-2 py-1 rounded">n</kbd> New thought</li>
+                {% endif %}
                 <li><kbd class="bg-zinc-800 px-2 py-1 rounded">?</kbd> Toggle help</li>
               </ul>
             </div>
@@ -320,7 +359,9 @@
             <div class="border-b border-zinc-700 pb-2">
               <h3 class="text-lg font-semibold text-cyan-500 mb-2">Actions</h3>
               <ul class="space-y-2 text-zinc-300">
+                {% if current_user %}
                 <li><kbd class="bg-zinc-800 px-2 py-1 rounded">e</kbd> Edit post</li>
+                {% endif %}
                 <li><kbd class="bg-zinc-800 px-2 py-1 rounded">?</kbd> Toggle help</li>
               </ul>
             </div>

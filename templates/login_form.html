@@ -1,23 +1,54 @@
 <div id="loginwrapper" class="m-auto w-96">
     <h1 class="text-center mb-6 text-3xl font-bold">login</h1>
-    <form class="login m-auto flex w-80 flex-col shadow-lg shadow-zinc-950 border-2 border-black rounded-xl pt-4" hx-post="{{ config.root }}/login/"
-          action="{{ config.root }}/login/" hx-target="#loginwrapper" method="POST" name="login">
-        <label class="text-center" for="username">Username:</label>
-        <input class="mx-8 mb-4 border border-black bg-zinc-950 p-1 text-center focus:bg-zinc-900" type="text"
-               id="username" name="username" autocomplete="username" required />
-        <label class="text-center" for="password">Password:</label>
-        <input class="mx-8 mb-4 border border-black bg-zinc-950 p-1 text-center focus:bg-zinc-900" type="password"
-               id="password" name="password" autocomplete="current-password" required />
-
-        <div class="my-8 flex w-full justify-evenly">
-            <input class="border border-black bg-zinc-950 px-6 py-2 hover:bg-zinc-900" type="submit" value="Login" />
-            <button class="border border-black bg-zinc-950 px-6 py-2 hover:bg-zinc-900" type="submit"
-                    hx-get="{{ config.root }}/signup" hx-target="#loginwrapper" value="Sign Up">
-                Sign Up
-            </button>
+    <form hx-post="{{ get_base_url(request) }}/login"
+          hx-target="#modal-container"
+          hx-swap="innerHTML"
+          class="space-y-6">
+        <div>
+            <label for="username" class="block text-lg mb-2">Username</label>
+            <input type="text"
+                   name="username"
+                   id="username"
+                   required
+                   autofocus
+                   class="w-full rounded-lg border border-black bg-zinc-950 p-3 focus:bg-zinc-900">
         </div>
+        <div>
+            <label for="password" class="block text-lg mb-2">Password</label>
+            <input type="password"
+                   name="password"
+                   id="password"
+                   required
+                   class="w-full rounded-lg border border-black bg-zinc-950 p-3 focus:bg-zinc-900">
+        </div>
+        <input type="hidden" name="grant_type" value="password">
         {% if error %}
-            <p style="color: #d14040">{{ error }}</p>
+        <div class="bg-red-900/50 border border-red-700 text-red-200 p-4 rounded-lg">
+            {{ error }}
+        </div>
         {% endif %}
+        <div class="flex flex-col space-y-4">
+            <div class="flex justify-between items-center">
+                <button type="submit"
+                        class="rounded-lg border border-cyan-500 bg-cyan-500 px-6 py-3 text-lg font-semibold text-white hover:bg-cyan-600">
+                    Login
+                </button>
+                <button type="button"
+                        onclick="document.getElementById('modal-container').innerHTML = ''"
+                        class="text-zinc-400 hover:text-zinc-200">
+                    Cancel
+                </button>
+            </div>
+            <div class="text-center">
+                <span class="text-zinc-400">Don't have an account?</span>
+                <button type="button"
+                        hx-get="{{ get_base_url(request) }}/login-modal/?signup=true"
+                        hx-target="#modal-container"
+                        hx-swap="innerHTML"
+                        class="text-cyan-500 hover:text-cyan-400 ml-2">
+                    Sign Up
+                </button>
+            </div>
+        </div>
     </form>
 </div>

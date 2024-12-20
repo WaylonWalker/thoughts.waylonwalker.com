@@ -50,6 +50,7 @@ dependencies = [
     "typer",
     "uvicorn[standard]",
     "Mastodon.py",
+    "beautifulsoup4",
 ]
 dynamic = ["version"]
 

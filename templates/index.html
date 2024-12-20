@@ -1,11 +1,6 @@
 {% extends 'base.html' %} {% block content %}
   <h1 class='text-3xl font-bold mb-6' style='text-align: center; margin-top: 5rem;'>Waylon Walker's Thoughts</h1>
   <p class='text-xl font-thin max-w-lg my-8 mx-auto'> You found my thought's a collection of short posts generally tied to a link on the web and written through a small chrome extension. See full posts on <a href='https://waylonwalker.com' class='text-pink-500 font-normal'>waylonwalker.com</a> </p>
-  <div hx-get="{{ config.root }}/users/me/new-thought/" hx-trigger="load">
-    Loading
-  </div>
-  <h2 class='text-2xl font-bold mb-4' style='text-align: center; margin-top: 5rem;'>Thoughts</h2>
-
 
   <div class='container m-auto max-w-4xl m-12 p-4'>
     <input class="p-4 pform-controlborder w-full shadow-lg border-black bg-zinc-950 hover:bg-zinc-950/80 rounded block"
@@ -18,12 +13,5 @@
     >
   </div>
 
-  <div
-    id="posts"
-    class='flex-grow'
-    hx-get="/posts/"
-    hx-target="#posts"
-    hx-swap="outerHTML"
-    hx-trigger="load"
-  ></div>
+  {% include 'posts.html' %}
 {% endblock %}
