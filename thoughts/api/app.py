@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from sqlmodel import select
 from thoughts.api.post import post_router, get_session, Posts, Post, md
 from thoughts.api.user import try_get_current_active_user, user_router
+from thoughts.api.analytics import analytics_router
 from thoughts.config import config
 
 cache = Cache("cache", size_limit=0.5 * (2**30))
@@ -100,6 +101,7 @@ def get_css(request: Request):
 
 app.include_router(post_router)
 app.include_router(user_router)
+app.include_router(analytics_router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 

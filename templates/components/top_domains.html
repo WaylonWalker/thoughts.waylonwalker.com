@@ -1,0 +1,13 @@
+<div id="top-domains-section" class="bg-zinc-900 p-6 rounded-lg shadow-lg">
+    <h2 class="text-xl font-semibold text-pink-400 mb-4">Top 10 Linked Domains</h2>
+    <div id="top-domains-list" class="space-y-2">
+        {% for domain in top_domains %}
+        <div class="flex justify-between items-center py-2 border-b border-zinc-800">
+            <span class="text-zinc-300">{{ domain.domain }}</span>
+            <span class="text-pink-300 font-mono">{{ domain.count }}</span>
+        </div>
+        {% else %}
+        <div class="text-zinc-400">No domains found</div>
+        {% endfor %}
+    </div>
+</div>

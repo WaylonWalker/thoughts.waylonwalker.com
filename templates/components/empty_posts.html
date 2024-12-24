@@ -1,0 +1,15 @@
+<div id="empty-posts-section" class="bg-zinc-900 p-6 rounded-lg shadow-lg">
+    <h2 class="text-xl font-semibold text-pink-400 mb-4">Posts with Empty Messages</h2>
+    <div id="empty-posts-list" class="space-y-4">
+        {% for post in empty_posts %}
+        <div class="p-4 bg-zinc-800 rounded empty-post-item">
+            <div class="flex justify-between items-start">
+                <a href="{{ config.root }}/post/{{ post.id }}" class="text-pink-400 hover:text-pink-300 font-semibold">{{ post.title }}</a>
+                <span class="text-zinc-400 text-sm">{{ post.date }}</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-zinc-400">No empty posts found</div>
+        {% endfor %}
+    </div>
+</div>

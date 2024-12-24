@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="analytics-container" class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-pink-500 mb-8">Thoughts Analytics</h1>
+    
+    <!-- Contribution Graph -->
+    {% include 'components/contribution_graph.html' %}
+    
+    <!-- Posts per Day Chart -->
+    <div id="posts-chart-section" class="bg-zinc-900 p-6 rounded-lg shadow-lg mb-8">
+        <h2 class="text-xl font-semibold text-pink-400 mb-4">Posts per Day</h2>
+        <canvas id="postsPerDayChart" class="w-full h-64"></canvas>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <!-- Top 10 Linked Domains -->
+        {% include 'components/top_domains.html' %}
+
+        <!-- Post Length Stats -->
+        {% include 'components/post_stats.html' %}
+    </div>
+
+    <!-- Longest Posts -->
+    {% include 'components/longest_posts.html' %}
+
+    <!-- Empty Posts -->
+    {% include 'components/empty_posts.html' %}
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Analytics JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    // Fetch only the time series data for the chart
+    const response = await fetch('{{ config.root }}/api/analytics/timeseries');
+    const data = await response.json();
+
+    // Posts per Day Chart
+    const ctx = document.getElementById('postsPerDayChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.posts_per_day.map(d => d.date),
+            datasets: [{
+                label: 'Posts',
+                data: data.posts_per_day.map(d => d.count),
+                borderColor: 'rgb(236, 72, 153)',
+                backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+<style>
+/* Add custom styles for contribution graph */
+.contribution-grid {
+    min-width: 722px; /* Ensure minimum width for 53 weeks */
+}
+
+#contribution-graph {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(236, 72, 153) #1e1e1e;
+}
+
+#contribution-graph::-webkit-scrollbar {
+    height: 8px;
+}
+
+#contribution-graph::-webkit-scrollbar-track {
+    background: #1e1e1e;
+    border-radius: 4px;
+}
+
+#contribution-graph::-webkit-scrollbar-thumb {
+    background-color: rgb(236, 72, 153);
+    border-radius: 4px;
+}
+</style>
+{% endblock %}

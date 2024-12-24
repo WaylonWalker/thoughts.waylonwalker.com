@@ -1,0 +1,17 @@
+<div id="longest-posts-section" class="bg-zinc-900 p-6 rounded-lg shadow-lg mb-8">
+    <h2 class="text-xl font-semibold text-pink-400 mb-4">Top 10 Longest Posts</h2>
+    <div id="longest-posts-list" class="space-y-4">
+        {% for post in longest_posts %}
+        <div class="p-4 bg-zinc-800 rounded longest-post-item">
+            <div class="flex justify-between items-start mb-2">
+                <a href="{{ config.root }}/post/{{ post.id }}" class="text-pink-400 hover:text-pink-300 font-semibold">{{ post.title }}</a>
+                <span class="text-zinc-400 text-sm">{{ post.length }} chars</span>
+            </div>
+            <p class="text-zinc-300 text-sm truncate">{{ post.message or '' }}</p>
+            <div class="text-zinc-500 text-xs mt-2">{{ post.date }}</div>
+        </div>
+        {% else %}
+        <div class="text-zinc-400">No posts found</div>
+        {% endfor %}
+    </div>
+</div>

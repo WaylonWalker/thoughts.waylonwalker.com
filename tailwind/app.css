@@ -46,6 +46,10 @@ body::-webkit-scrollbar-thumb {
 /*   background: #c0a0b9; */
 /* } */
 
+.post-body {
+  @apply px-5 pb-5 text-lg;
+}
+
 .post-body p,
 .post-body h1,
 .post-body h2,
@@ -53,7 +57,20 @@ body::-webkit-scrollbar-thumb {
 .post-body h4,
 .post-body h5,
 .post-body h6 {
-  @apply p-4;
+  @apply mb-4;
+}
+
+.post-body ul {
+  @apply mb-4 ml-6 list-disc space-y-2 text-zinc-200;
+}
+
+.post-body ol {
+  @apply mb-4 ml-6 list-decimal space-y-2 text-zinc-200;
+}
+
+.post-body li > ul,
+.post-body li > ol {
+  @apply mt-2;
 }
 
 .post-body .highlight {

@@ -1,3 +1,8 @@
+## 0.0.9
+
+- add analytics
+- fix ul and ol in markdown
+
 ## 0.0.8
 
 - new post is now a modal
