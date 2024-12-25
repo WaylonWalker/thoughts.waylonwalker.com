@@ -1,0 +1,23 @@
+{% if tag_stats %}
+    <div id="tag-stats-section" class="bg-zinc-900 p-6 rounded-lg shadow-lg my-8">
+        <h2 class="text-xl font-semibold text-pink-400 mb-4">Tags ({{ tag_stats|length }} total)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for tag in tag_stats %}
+                <div class="bg-zinc-800 p-4 rounded-lg">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-medium text-pink-300">#{{ tag.name }}</h3>
+                        <span class="text-sm text-zinc-400">{{ tag.count }} posts</span>
+                    </div>
+                    <div class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                        {% for post in tag.posts %}
+                            <a href="/post/{{ post.id }}" class="block hover:bg-zinc-700 p-2 rounded transition-colors">
+                                <div class="text-sm text-cyan-200 truncate">{{ post.title }}</div>
+                                <div class="text-xs text-zinc-400">{{ post.date }}</div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}

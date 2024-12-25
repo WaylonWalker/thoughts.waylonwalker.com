@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Annotated
 from urllib.parse import urlparse
 import calendar
+from statistics import mean
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -84,11 +85,28 @@ def get_contribution_data(posts: list[Post], year: int) -> tuple[list, list, int
 
 def get_analytics_data(session: Session):
     """Get all analytics data"""
+    # Query all posts
+    all_posts = session.exec(select(Post)).all()
+
+    # Get all years from posts
+    years = sorted(set(post.date.year for post in all_posts), reverse=True)
+    
+    # Get contribution graph data for each year
+    contribution_graphs = []
+    for year in years:
+        data, colors, max_count, total_posts = get_contribution_data(all_posts, year)
+        contribution_graphs.append({
+            "year": year,
+            "data": data,
+            "colors": colors,
+            "max_count": max_count,
+            "total_posts": total_posts
+        })
+
     # Posts per day for the last 30 days
     thirty_days_ago = datetime.now() - timedelta(days=30)
 
-    # Query all posts
-    all_posts = session.exec(select(Post)).all()
+    # Filter posts to last 30 days
     posts = [p for p in all_posts if p.date >= thirty_days_ago]
 
     # Group posts by date
@@ -127,7 +145,7 @@ def get_analytics_data(session: Session):
     posts_with_messages = [post for post in all_posts if post.message]
     message_lengths = [len(post.message or "") for post in posts_with_messages]
     avg_length = (
-        round(sum(message_lengths) / len(message_lengths)) if message_lengths else 0
+        round(mean(message_lengths)) if message_lengths else 0
     )
 
     # Top 10 longest posts
@@ -154,28 +172,49 @@ def get_analytics_data(session: Session):
         if not post.message
     ]
 
-    # Get contribution graph data
-    years = sorted(set(post.date.year for post in all_posts), reverse=True)
-    contribution_graphs = []
-    for year in years:
-        data, colors, max_count, total_posts = get_contribution_data(all_posts, year)
-        contribution_graphs.append({
-            "year": year,
-            "data": data,
-            "colors": colors,
-            "max_count": max_count,
-            "total_posts": total_posts
-        })
+    # Get tag statistics
+    tag_stats = {}
+    for post in all_posts:
+        if post.tags:
+            # Handle both string and list formats
+            tags = post.tags if isinstance(post.tags, list) else [t.strip() for t in post.tags.split(',')]
+            for tag in tags:
+                if not tag:  # Skip empty tags
+                    continue
+                if tag in tag_stats:
+                    tag_stats[tag]["count"] += 1
+                    tag_stats[tag]["posts"].append({
+                        "id": post.id,
+                        "title": post.title,
+                        "date": post.date.strftime("%Y-%m-%d")
+                    })
+                else:
+                    tag_stats[tag] = {
+                        "count": 1,
+                        "posts": [{
+                            "id": post.id,
+                            "title": post.title,
+                            "date": post.date.strftime("%Y-%m-%d")
+                        }]
+                    }
+    
+    # Sort tags by count and get top tags
+    sorted_tags = sorted(
+        [{"name": tag, **stats} for tag, stats in tag_stats.items()],
+        key=lambda x: x["count"],
+        reverse=True
+    )
 
     return {
         "posts_per_day": posts_per_day,
         "top_domains": top_domains,
-        "avg_length": avg_length,
+        "average_length": avg_length,
         "shortest_post": min(message_lengths) if message_lengths else 0,
         "longest_post": max(message_lengths) if message_lengths else 0,
         "longest_posts": longest_posts_data,
         "empty_posts": empty_posts,
         "contribution_graphs": contribution_graphs,
+        "tag_stats": sorted_tags
     }
 
 
@@ -207,3 +246,64 @@ async def get_analytics_timeseries(
     """Get time series data for the analytics charts"""
     analytics_data = get_analytics_data(session)
     return JSONResponse({"posts_per_day": analytics_data["posts_per_day"]})
+
+
+@analytics_router.get("/api/analytics/graph")
+async def get_graph_data(
+    session: Session = Depends(get_session),
+    current_user: Annotated[User | None, Depends(try_get_current_active_user)] = None,
+):
+    """Get tag and post connection data for force-directed graph"""
+    # Get all posts
+    all_posts = session.exec(select(Post)).all()
+    
+    # Create nodes and links
+    nodes = []
+    links = []
+    tag_ids = {}
+    post_ids = {}
+    current_id = 0
+
+    # First pass: create nodes for tags and posts
+    for post in all_posts:
+        if not post.tags:
+            continue
+            
+        # Add post node if not already added
+        if post.id not in post_ids:
+            post_ids[post.id] = current_id
+            nodes.append({
+                "id": current_id,
+                "name": post.title[:50] + ("..." if len(post.title) > 50 else ""),
+                "type": "post",
+                "post_id": post.id  # Add post ID for linking
+            })
+            current_id += 1
+
+        # Handle both string and list formats for tags
+        tags = post.tags if isinstance(post.tags, list) else [t.strip() for t in post.tags.split(',')]
+        for tag in tags:
+            if not tag:  # Skip empty tags
+                continue
+                
+            # Add tag node if not already added
+            if tag not in tag_ids:
+                tag_ids[tag] = current_id
+                nodes.append({
+                    "id": current_id,
+                    "name": tag,
+                    "type": "tag"
+                })
+                current_id += 1
+
+            # Add link between post and tag
+            links.append({
+                "source": post_ids[post.id],
+                "target": tag_ids[tag],
+                "value": 1
+            })
+
+    return {
+        "nodes": nodes,
+        "links": links
+    }

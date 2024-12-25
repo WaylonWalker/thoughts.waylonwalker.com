@@ -616,6 +616,10 @@ video {
   margin: 1.25rem;
 }
 
+.m-8 {
+  margin: 2rem;
+}
+
 .m-\[-10px\] {
   margin: -10px;
 }
@@ -722,6 +726,10 @@ video {
 
 .h-screen {
   height: 100vh;
+}
+
+.max-h-48 {
+  max-height: 12rem;
 }
 
 .min-h-\[100vh\] {
@@ -1248,6 +1256,10 @@ video {
 
 .font-extrabold {
   font-weight: 800;
+}
+
+.font-medium {
+  font-weight: 500;
 }
 
 .font-normal {
@@ -2010,6 +2022,27 @@ body::-webkit-scrollbar-thumb:hover {
 
 /* Literal.Number.Integer.Long */
 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  border-radius: 9999px;
+  --tw-bg-opacity: 1;
+  background-color: rgb(39 39 42 / var(--tw-bg-opacity, 1));
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  --tw-bg-opacity: 1;
+  background-color: rgb(236 72 153 / var(--tw-bg-opacity, 1));
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(244 114 182 / var(--tw-bg-opacity, 1));
+}
+
 .autofill\:bg-yellow-500:-webkit-autofill {
   --tw-bg-opacity: 1;
   background-color: rgb(234 179 8 / var(--tw-bg-opacity, 1));
@@ -2028,6 +2061,11 @@ body::-webkit-scrollbar-thumb:hover {
 .hover\:bg-pink-600:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(219 39 119 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-zinc-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(63 63 70 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-zinc-900:hover {
@@ -2104,5 +2142,11 @@ body::-webkit-scrollbar-thumb:hover {
 @media (min-width: 768px) {
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

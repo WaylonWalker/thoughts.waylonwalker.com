@@ -1,3 +1,7 @@
+## 0.0.10
+
+- tag analytics
+
 ## 0.0.9
 
 - add analytics
