@@ -1,3 +1,8 @@
+## 0.0.11
+
+- center images
+- image modal
+
 ## 0.0.10
 
 - tag analytics

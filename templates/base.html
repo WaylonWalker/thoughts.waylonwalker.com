@@ -100,6 +100,13 @@
         <div id="help-content"></div>
       </div>
     </div>
+    <div id="image-modal" class="fixed inset-0 hidden items-center justify-center z-50">
+      <div class="fixed inset-0 bg-black/80 backdrop-blur-sm"></div>
+      <div class="relative max-h-[90vh] max-w-[90vw]">
+        <img id="modal-image" class="max-h-[90vh] max-w-[90vw] object-contain" src="" alt="" />
+        <button onclick="toggleImageModal()" class="absolute -top-10 right-0 text-3xl text-zinc-400 hover:text-zinc-200">&times;</button>
+      </div>
+    </div>
     <div class='flex flex-col min-h-screen'>
       <header class="flex items-center justify-between p-4 border-b border-cyan-700">
         <div class="flex items-center gap-4">
@@ -388,6 +395,53 @@
       helpModal.addEventListener('click', (e) => {
         if (e.target === helpModal) {
           toggleHelpModal();
+        }
+      });
+
+      // Image modal management
+      const imageModal = document.getElementById('image-modal');
+      const modalImage = document.getElementById('modal-image');
+      let isImageModalOpen = false;
+
+      function toggleImageModal(imageSrc = null) {
+        isImageModalOpen = !isImageModalOpen;
+        imageModal.style.display = isImageModalOpen ? 'flex' : 'none';
+        if (imageSrc) {
+          modalImage.src = imageSrc;
+          modalImage.alt = imageSrc.split('/').pop();
+        }
+      }
+
+      // Make post-body images clickable
+      document.addEventListener('DOMContentLoaded', function() {
+        function initializeImageModals() {
+          document.querySelectorAll('.post-body img').forEach(img => {
+            img.style.cursor = 'pointer';
+            img.onclick = function() {
+              toggleImageModal(this.src);
+            };
+          });
+        }
+        
+        initializeImageModals();
+        
+        // Re-initialize when content is updated via HTMX
+        document.body.addEventListener('htmx:afterSwap', function() {
+          initializeImageModals();
+        });
+      });
+
+      // Close image modal when clicking outside
+      imageModal.addEventListener('click', (e) => {
+        if (e.target === imageModal) {
+          toggleImageModal();
+        }
+      });
+
+      // Close image modal with Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isImageModalOpen) {
+          toggleImageModal();
         }
       });
     </script>

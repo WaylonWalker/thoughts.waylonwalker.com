@@ -50,6 +50,10 @@ body::-webkit-scrollbar-thumb {
   @apply px-5 pb-5 text-lg;
 }
 
+.post-body img {
+  @apply mx-auto block rounded-xl;
+}
+
 .post-body p,
 .post-body h1,
 .post-body h2,
