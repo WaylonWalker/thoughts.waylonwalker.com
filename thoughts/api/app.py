@@ -1,23 +1,22 @@
 import logging
 from pathlib import Path
-import os
 import subprocess
 from urllib.parse import quote_plus
 
 logger = logging.getLogger(__name__)
 
 from diskcache import Cache
-from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Depends
+from fastapi import Depends, FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 import httpx
-from starlette.requests import Request
 from sqlalchemy.orm import Session
 from sqlmodel import select
-from thoughts.api.post import post_router, get_session, Posts, Post, md
-from thoughts.api.user import try_get_current_active_user, user_router
+from starlette.requests import Request
 from thoughts.api.analytics import analytics_router
+from thoughts.api.post import Post, Posts, get_session, md, post_router
+from thoughts.api.user import try_get_current_active_user, user_router
 from thoughts.config import config
 
 cache = Cache("cache", size_limit=0.5 * (2**30))
@@ -90,6 +89,7 @@ async def shutdown_event():
 
 
 @app.get("/app.css", include_in_schema=False)
+@app.get("/app.css/{version}", include_in_schema=False)
 def get_css(request: Request):
     """Serve CSS with cache busting query param support"""
     css_path = Path(__file__).parent.parent.parent / "static" / "app.css"
@@ -152,14 +152,9 @@ async def get(
     request: Request,
     current_user=Depends(try_get_current_active_user),
     session: Session = Depends(get_session),
-    response_class=HTMLResponse
+    response_class=HTMLResponse,
 ):
-    statement = (
-        select(Post)
-        .where(Post.published)
-        .order_by(Post.id.desc())
-        .limit(10)
-    )
+    statement = select(Post).where(Post.published).order_by(Post.id.desc()).limit(10)
     posts = session.exec(statement).all()
     posts = Posts(__root__=posts)
 
@@ -178,8 +173,8 @@ async def get(
             "md": md,
             "is_logged_in": is_logged_in,
             "page": 1,
-            "page_size": 10
-        }
+            "page_size": 10,
+        },
     )
 
 

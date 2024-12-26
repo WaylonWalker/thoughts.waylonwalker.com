@@ -1,3 +1,7 @@
+## 0.0.12
+
+- better css cache buster
+
 ## 0.0.11
 
 - center images
