@@ -1,3 +1,7 @@
+## 0.0.13
+
+- make image modals larger
+
 ## 0.0.12
 
 - better css cache buster

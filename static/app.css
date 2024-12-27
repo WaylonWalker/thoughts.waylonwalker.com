@@ -744,8 +744,8 @@ video {
   max-height: 12rem;
 }
 
-.max-h-\[90vh\] {
-  max-height: 90vh;
+.max-h-\[95vh\] {
+  max-height: 95vh;
 }
 
 .min-h-\[100vh\] {
@@ -754,6 +754,10 @@ video {
 
 .min-h-\[300px\] {
   min-height: 300px;
+}
+
+.min-h-\[50vh\] {
+  min-height: 50vh;
 }
 
 .min-h-\[calc\(100vh-8rem\)\] {
@@ -804,8 +808,8 @@ video {
   max-width: 50vw;
 }
 
-.max-w-\[90vw\] {
-  max-width: 90vw;
+.max-w-\[95vw\] {
+  max-width: 95vw;
 }
 
 .max-w-lg {
