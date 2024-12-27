@@ -3,7 +3,6 @@ from pathlib import Path
 import subprocess
 from urllib.parse import quote_plus
 
-logger = logging.getLogger(__name__)
 
 from diskcache import Cache
 from fastapi import Depends, FastAPI, File, Form, UploadFile
@@ -15,9 +14,12 @@ from sqlalchemy.orm import Session
 from sqlmodel import select
 from starlette.requests import Request
 from thoughts.api.analytics import analytics_router
-from thoughts.api.post import Post, Posts, get_session, md, post_router
+from thoughts.api.image_modal import image_modal
+from thoughts.api.post import Post, Posts, get_session, post_router
 from thoughts.api.user import try_get_current_active_user, user_router
 from thoughts.config import config
+
+logger = logging.getLogger(__name__)
 
 cache = Cache("cache", size_limit=0.5 * (2**30))
 app = FastAPI(
@@ -102,6 +104,7 @@ def get_css(request: Request):
 app.include_router(post_router)
 app.include_router(user_router)
 app.include_router(analytics_router)
+app.add_api_route("/image-modal/", image_modal, response_class=HTMLResponse)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
@@ -170,7 +173,7 @@ async def get(
             "config": config,
             "current_user": current_user,
             "posts": posts,
-            "md": md,
+            "md": config.md,
             "is_logged_in": is_logged_in,
             "page": 1,
             "page_size": 10,
@@ -279,3 +282,11 @@ async def get_robots(request: Request):
 #         return Response(
 #             r.content, background=BackgroundTask(r.aclose), headers=r.headers
 #         )
+
+
+@app.get("/image-modal/", response_class=HTMLResponse)
+async def image_modal(request: Request, image_url: str):
+    return config.templates.TemplateResponse(
+        "image_modal.html",
+        {"request": request, "image_url": image_url},
+    )

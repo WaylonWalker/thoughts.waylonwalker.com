@@ -1,0 +1,22 @@
+<div id="image-modal" class="fixed inset-0 z-50">
+  <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" 
+       onclick="this.parentElement.remove()"></div>
+  <div class="relative flex h-full items-center justify-center">
+    <div class="relative max-h-[95vh] max-w-[95vw]">
+      <img src="{{ image_url }}" alt="" class="max-h-[95vh] max-w-[95vw] min-h-[50vh] object-contain rounded-xl" />
+      <button id="close-image-modal" class="absolute -top-10 right-0 text-3xl text-zinc-400 hover:text-zinc-200"
+              onclick="this.closest('#image-modal').remove()">&times;</button>
+    </div>
+  </div>
+</div>
+<script>
+  // Handle ESC key to close modal
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('image-modal');
+      if (modal) {
+        modal.remove();
+      }
+    }
+  });
+</script>

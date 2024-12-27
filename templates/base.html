@@ -89,22 +89,11 @@
       {% endblock %} {% endblock %}
   </head>
   <body class="mx-auto bg-zinc-950">
-    <div id="modal-container"></div>
+    <div id="htmx-modal-container"></div>
     <div id="help-modal" class="fixed inset-0 hidden items-center justify-center">
       <div class="fixed inset-0 bg-black/80 backdrop-blur-sm"></div>
-      <div class="relative bg-zinc-900/90 backdrop-blur-sm p-8 rounded-lg shadow-xl max-w-lg w-full mx-4 border border-zinc-700">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-bold text-pink-500">Keyboard Shortcuts</h2>
-          <button onclick="toggleHelpModal()" class="text-zinc-400 hover:text-zinc-200">&times;</button>
-        </div>
+      <div class="relative bg-zinc-900 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
         <div id="help-content"></div>
-      </div>
-    </div>
-    <div id="image-modal" class="fixed inset-0 hidden items-center justify-center z-50">
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-sm"></div>
-      <div class="relative max-h-[95vh] max-w-[95vw]">
-        <img id="modal-image" class="max-h-[95vh] max-w-[95vw] min-h-[50vh] object-contain" src="" alt="" />
-        <button onclick="toggleImageModal()" class="absolute -top-10 right-0 text-3xl text-zinc-400 hover:text-zinc-200">&times;</button>
       </div>
     </div>
     <div class='flex flex-col min-h-screen'>
@@ -123,7 +112,7 @@
           <button
             class="rounded-lg border border-pink-500 bg-pink-500 px-4 py-2 text-white hover:bg-pink-600"
             hx-get="{{ get_base_url(request) }}/new-thought/"
-            hx-target="#modal-container"
+            hx-target="#htmx-modal-container"
             hx-swap="innerHTML"
             hx-trigger="click"
           >
@@ -133,7 +122,7 @@
           <button
             class="rounded-lg border border-cyan-500 bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-600"
             hx-get="{{ get_base_url(request) }}/login-modal/"
-            hx-target="#modal-container"
+            hx-target="#htmx-modal-container"
             hx-swap="innerHTML"
             hx-trigger="click"
           >
@@ -207,7 +196,7 @@
           initializePostNavigation();
         }
         // Focus message textarea when edit modal is loaded
-        if (evt.detail.target.id === 'modal-container') {
+        if (evt.detail.target.id === 'htmx-modal-container') {
           const form = evt.detail.target.querySelector('form');
           // Only auto-focus message for edit forms, not new thought
           if (form && form.getAttribute('hx-patch')) {
@@ -395,53 +384,6 @@
       helpModal.addEventListener('click', (e) => {
         if (e.target === helpModal) {
           toggleHelpModal();
-        }
-      });
-
-      // Image modal management
-      const imageModal = document.getElementById('image-modal');
-      const modalImage = document.getElementById('modal-image');
-      let isImageModalOpen = false;
-
-      function toggleImageModal(imageSrc = null) {
-        isImageModalOpen = !isImageModalOpen;
-        imageModal.style.display = isImageModalOpen ? 'flex' : 'none';
-        if (imageSrc) {
-          modalImage.src = imageSrc;
-          modalImage.alt = imageSrc.split('/').pop();
-        }
-      }
-
-      // Make post-body images clickable
-      document.addEventListener('DOMContentLoaded', function() {
-        function initializeImageModals() {
-          document.querySelectorAll('.post-body img').forEach(img => {
-            img.style.cursor = 'pointer';
-            img.onclick = function() {
-              toggleImageModal(this.src);
-            };
-          });
-        }
-
-        initializeImageModals();
-
-        // Re-initialize when content is updated via HTMX
-        document.body.addEventListener('htmx:afterSwap', function() {
-          initializeImageModals();
-        });
-      });
-
-      // Close image modal when clicking outside
-      imageModal.addEventListener('click', (e) => {
-        if (e.target === imageModal) {
-          toggleImageModal();
-        }
-      });
-
-      // Close image modal with Escape key
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isImageModalOpen) {
-          toggleImageModal();
         }
       });
     </script>

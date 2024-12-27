@@ -116,7 +116,7 @@ class Config(BaseSettings):
 
     @property
     def md(self):
-        return MarkdownIt(
+        md = MarkdownIt(
             "gfm-like",
             {
                 "linkify": True,
@@ -125,6 +125,24 @@ class Config(BaseSettings):
                 "highlight": highlight_code,
             },
         )
+
+        def render_image(tokens, idx, options, env):
+            token = tokens[idx]
+
+            # Get src and alt from token attributes dictionary
+            src = token.attrs.get("src", "")
+            alt = token.attrs.get("alt", "")
+
+            return (
+                f'<img src="{src}" alt="{alt}" '
+                f'hx-get="/image-modal/?image_url={quote_plus(src)}" '
+                f'hx-target="#htmx-modal-container" '
+                f'hx-swap="innerHTML" '
+                f'class="cursor-pointer hover:opacity-90 transition-opacity duration-200">'
+            )
+
+        md.renderer.rules["image"] = render_image
+        return md
 
     @validator("env")
     def validate_env(cls, v):

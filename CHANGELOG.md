@@ -1,3 +1,7 @@
+## 0.0.14
+
+- convert image modal to htmx
+
 ## 0.0.13
 
 - make image modals larger

@@ -51,7 +51,8 @@ body::-webkit-scrollbar-thumb {
 }
 
 .post-body img {
-  @apply mx-auto block rounded-xl;
+  @apply mx-auto block rounded-xl cursor-pointer;
+  @apply hover:opacity-90 transition-opacity duration-200;
 }
 
 .post-body p,
