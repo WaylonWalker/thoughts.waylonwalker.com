@@ -1,4 +1,4 @@
-<div id="modal-container">
+<div id="htmx-modal-container">
     <div class="fixed inset-0 z-50 overflow-y-auto"
          aria-labelledby="modal-title"
          role="dialog"
@@ -16,7 +16,7 @@
                       name="newPost"
                       hx-target="#post-{{ post.id }}"
                       hx-swap="outerHTML"
-                      hx-on::after-request="document.getElementById('modal-container').innerHTML = ''">
+                      hx-on::after-request="document.getElementById('htmx-modal-container').innerHTML = ''">
                     <div class="mb-6 flex w-full items-center justify-between">
                         <p class="text-lg">Author: {{ current_user.username }}</p>
                         <a class="h-6 w-6 text-cyan-200" href="/logout" title="logout">
@@ -57,7 +57,7 @@
                         <div class="flex gap-4">
                             <button class="rounded-lg border border-black bg-zinc-950 px-6 py-3 text-lg hover:bg-zinc-900"
                                     type="button"
-                                    onclick="document.getElementById('modal-container').innerHTML = ''">
+                                    onclick="document.getElementById('htmx-modal-container').innerHTML = ''">
                                 Cancel
                             </button>
                             <button class="rounded-lg border border-pink-500 bg-pink-500 px-6 py-3 text-lg font-semibold text-white hover:bg-pink-600"
@@ -75,7 +75,7 @@
 <script>
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        document.getElementById('modal-container').innerHTML = '';
+        document.getElementById('htmx-modal-container').innerHTML = '';
     }
     if (e.key === 'Enter' && e.ctrlKey) {
         e.preventDefault();

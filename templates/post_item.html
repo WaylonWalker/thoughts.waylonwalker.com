@@ -29,7 +29,7 @@
                 {% include 'delete.svg' %}
             </button>
             <button class="h-8 w-8 p-1 text-center" hx-get="{{ config.root }}/edit-thought/{{ post.id }}"
-                    hx-target="#modal-container" hx-swap="innerHTML" title="Edit">
+                    hx-target="#htmx-modal-container" hx-swap="innerHTML" title="Edit">
                 {% include 'edit.svg' %}
             </button>
         </div>

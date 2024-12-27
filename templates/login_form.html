@@ -1,7 +1,7 @@
 <div id="loginwrapper" class="m-auto w-96">
     <h1 class="text-center mb-6 text-3xl font-bold">login</h1>
     <form hx-post="{{ get_base_url(request) }}/login"
-          hx-target="#modal-container"
+          hx-target="#htmx-modal-container"
           hx-swap="innerHTML"
           class="space-y-6">
         <div>
@@ -23,9 +23,9 @@
         </div>
         <input type="hidden" name="grant_type" value="password">
         {% if error %}
-        <div class="bg-red-900/50 border border-red-700 text-red-200 p-4 rounded-lg">
-            {{ error }}
-        </div>
+            <div class="bg-red-900/50 border border-red-700 text-red-200 p-4 rounded-lg">
+                {{ error }}
+            </div>
         {% endif %}
         <div class="flex flex-col space-y-4">
             <div class="flex justify-between items-center">
@@ -43,7 +43,7 @@
                 <span class="text-zinc-400">Don't have an account?</span>
                 <button type="button"
                         hx-get="{{ get_base_url(request) }}/login-modal/?signup=true"
-                        hx-target="#modal-container"
+                        hx-target="#htmx-modal-container"
                         hx-swap="innerHTML"
                         class="text-cyan-500 hover:text-cyan-400 ml-2">
                     Sign Up

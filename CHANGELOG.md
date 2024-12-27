@@ -1,3 +1,7 @@
+## 0.0.15
+
+- fix edit modal not htmx:targetError
+
 ## 0.0.14
 
 - convert image modal to htmx
