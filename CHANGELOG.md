@@ -1,3 +1,8 @@
+## 0.0.16
+
+- add dropper upload
+- fix new thought submit button
+
 ## 0.0.15
 
 - fix edit modal not htmx:targetError

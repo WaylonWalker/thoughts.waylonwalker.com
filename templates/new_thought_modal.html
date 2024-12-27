@@ -25,7 +25,7 @@
                         <div class="w-full max-w-lg bg-zinc-900 p-8 rounded-lg shadow-xl border border-zinc-700">
                             <div class="flex justify-between items-center mb-4">
                                 <h2 class="text-2xl font-bold text-pink-500">New Thought</h2>
-                                <button onclick="document.getElementById('modal-container').innerHTML = ''" class="text-zinc-400 hover:text-zinc-200">&times;</button>
+                                <button id="close-modal" type="button" onclick="document.getElementById('modal-container').innerHTML = ''" class="text-zinc-400 hover:text-zinc-200">&times;</button>
                             </div>
                             <form id="websiteForm"
                                   hx-post="{{ get_base_url(request) }}/post/"
@@ -84,12 +84,16 @@
                                                 onclick="document.getElementById('modal-container').innerHTML = ''">
                                             Cancel
                                         </button>
-                                        <button class="rounded-lg border border-pink-500 bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600"
-                                                type="submit">
+                                        <button
+                                            id="submit-new-thought"
+                                            class="rounded-lg border border-pink-500 bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600"
+                                            type="submit">
                                             Create Thought
                                         </button>
                                     </div>
                                 </div>
+                                <div id='dropper-error' class="text-red-500"></div>
+
                             </form>
                         </div>
                     </div>
@@ -133,7 +137,65 @@
         }
         if (e.key === 'Enter' && e.ctrlKey) {
             e.preventDefault();
-            htmx.trigger('#websiteForm', 'submit');
+            // htmx.trigger('#websiteForm', 'submit');
+            document.getElementById('submit-new-thought').click();
+        }
+    });
+
+    var messageInput = document.getElementById("message");
+    messageInput.addEventListener('paste', async function(e) {
+        console.log('paste');
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                e.preventDefault();
+        // const file = items[i].getAsFile();
+                const blob = items[i].getAsFile();
+                console.log(`Processing image: size=${blob.size} bytes`);
+
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const file = new File([blob], `screenshot-${timestamp}.png`, { type: 'image/png' });
+
+        // Create FormData and append the file
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('https://dropper.wayl.one/api/upload/', {
+          // const response = await fetch('http://localhost:8000/api/upload/', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Upload failed');
+                    }
+
+                    const data = await response.json();
+
+          // Construct the full URL using the returned filename
+                    const imageUrl = `https://dropper.wayl.one/api/file/${data.filename}`;
+
+          // Insert the markdown link at cursor position
+                    const cursorPos = messageInput.selectionStart;
+                    const textBefore = messageInput.value.substring(0, cursorPos);
+                    const textAfter = messageInput.value.substring(cursorPos);
+                    const markdownLink = `![image](${imageUrl})`;
+
+                    messageInput.value = textBefore + markdownLink + textAfter;
+
+          // Update cursor position after the inserted link
+                    messageInput.selectionStart = cursorPos + markdownLink.length;
+                    messageInput.selectionEnd = cursorPos + markdownLink.length;
+
+          // Trigger the keyup event to save form data
+                    messageInput.dispatchEvent(new Event('keyup'));
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                    document.getElementById('dropper-error').textContent = 'Failed to upload image: ' + error.message;
+                }
+                break;
+            }
         }
     });
 </script>
