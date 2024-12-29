@@ -190,9 +190,9 @@ async def try_get_current_active_user(
     try:
         current_user = await get_current_user(token, session)
         active_user = await get_current_active_user(current_user)
-        return active_user
-    except HTTPException:
+    except starlette.exceptions.HTTPException:
         return None
+    return active_user
 
 
 @user_router.post("/token", response_model=Token)
@@ -391,12 +391,23 @@ async def signup(
     return response
 
 
-@user_router.get("/users/me/", response_model=User)
+@user_router.get("/users/me/")
 async def read_users_me(
     current_user: Annotated[User, Depends(try_get_current_active_user)],
+    request: Request,
+    hx_request: Annotated[str | None, Header()] = None,
 ):
     if isinstance(current_user, User):
         return HTMLResponse(f"<p>{current_user.username}</p>")
+    if current_user is None and hx_request:
+        return config.templates.TemplateResponse(
+            "login_form.html", {"request": request, "config": config}
+        )
+    if current_user is None:
+        return config.templates.TemplateResponse(
+            "login.html", {"request": request, "config": config}
+        )
+
     return current_user
 
 

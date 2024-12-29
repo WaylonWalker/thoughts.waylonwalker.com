@@ -1,3 +1,7 @@
+## 0.0.18
+
+- fix: show login to chrome extension when logged out
+
 ## 0.0.17
 
 - fix signup
