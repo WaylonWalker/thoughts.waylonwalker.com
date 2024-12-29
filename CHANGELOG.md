@@ -1,3 +1,7 @@
+## 0.0.19
+
+- feat: link to users posts
+
 ## 0.0.18
 
 - fix: show login to chrome extension when logged out

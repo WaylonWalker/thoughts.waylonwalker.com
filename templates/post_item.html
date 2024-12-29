@@ -7,7 +7,7 @@
         </a>
     {% endif %}
     <div class="post-header flex w-full items-start justify-between p-5 text-pink-500">
-        <p>@{{ post.author.username }}</p>
+        <a href="/posts/{{ post.author.username }}" title="{{ post.author.username }}"><p>@{{ post.author.username }}</p></a>
         <p>{{ post.hr_date }}</p>
     </div>
     <a href="/post/{{ post.id}}" title="{{ post.title }}" class="text-cyan-200 hover:underline">
