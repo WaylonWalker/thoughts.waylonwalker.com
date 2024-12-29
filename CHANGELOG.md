@@ -1,3 +1,7 @@
+## 0.0.17
+
+- fix signup
+
 ## 0.0.16
 
 - add dropper upload

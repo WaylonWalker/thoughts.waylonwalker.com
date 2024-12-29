@@ -1,27 +1,17 @@
-from datetime import datetime, timedelta, timezone
 import base64
-from typing import Annotated, Optional
+from datetime import datetime, timedelta, timezone
+from rich.console import Console
 from sqlalchemy.exc import NoResultFound
 from thoughts.htmx import htmx
-from sqlmodel import select, Session
+from typing import Annotated
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    Form,
-    HTTPException,
-    Header,
-    Request,
-    status,
-    Body,
-)
+from fastapi import APIRouter, Depends, Form, HTTPException, Header, Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import (
     APIKeyCookie,
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
 )
-from fastapi.templating import Jinja2Templates
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -30,8 +20,9 @@ import starlette
 from starlette.responses import HTMLResponse
 
 from thoughts.config import config, get_session
-from thoughts.models.user import User, UserCreate
+from thoughts.models.user import User
 
+console = Console()
 # to get a string like this run:
 # openssl rand -hex 32
 SESSION_NAME = "thoughts-session"
@@ -124,7 +115,7 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     # First try session cookie
     if session is not None:
         try:
@@ -140,7 +131,7 @@ async def get_current_user(
         except Exception:
             # If session cookie fails, fall back to token
             pass
-    
+
     # Try bearer token
     if token is not None:
         try:
@@ -155,7 +146,7 @@ async def get_current_user(
             return user
         except JWTError:
             raise credentials_exception
-    
+
     raise credentials_exception
 
 
@@ -285,7 +276,7 @@ async def post_login(
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    
+
     # Handle HTMX request
     if hx_request:
         response = config.templates.TemplateResponse(
@@ -298,20 +289,22 @@ async def post_login(
         )
     else:
         response = RedirectResponse(url="/", status_code=303)
-    
+
     # Set cookie with proper domain and expiration
     expires = datetime.now(timezone.utc) + timedelta(days=30)
     host = request.headers.get("host", "").split(":")[0]  # Get host without port
-    
+
     response.set_cookie(
         key=SESSION_NAME,
         value=access_token,
         httponly=True,
         secure=False,  # Set to True if using HTTPS
-        samesite='lax',
+        samesite="lax",
         expires=expires.timestamp(),
-        path='/',
-        domain=host if host != "localhost" else None,  # Set domain for IP but not localhost
+        path="/",
+        domain=host
+        if host != "localhost"
+        else None,  # Set domain for IP but not localhost
     )
     return response
 
@@ -328,11 +321,16 @@ async def get_signup(
 async def signup(
     request: Request,
     username: str = Form(...),
+    full_name: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
     confirm_password: str = Form(...),
 ):
     """Sign up a new user"""
+    console.log(
+        "signup params:", username, full_name, email, password, confirm_password
+    )
+    console.log(username, full_name, email, password, confirm_password)
     if password != confirm_password:
         return config.templates.TemplateResponse(
             "login_modal.html",
@@ -343,6 +341,8 @@ async def signup(
                 "error": "Passwords do not match",
             },
         )
+    else:
+        console.log("Passwords match")
 
     # Check if username exists
     user = get_user(username)
@@ -356,14 +356,23 @@ async def signup(
                 "error": "Username already exists",
             },
         )
+    else:
+        console.log("User does not exist")
 
     # Create user
     db_session = next(get_session())
-    new_user = User(username=username, email=email, hashed_password=get_password_hash(password))
+    new_user = User(
+        username=username,
+        full_name=full_name,
+        email=email,
+        hashed_password=get_password_hash(password),
+        disabled=False,
+    )
+    console.log("New user:", new_user)
     db_session.add(new_user)
     db_session.commit()
     db_session.refresh(new_user)
-    
+
     # Log them in
     access_token = create_access_token(
         data={"sub": username},

@@ -1,19 +1,19 @@
-from typing import List, Optional
 from pydantic import validator
+from typing import List, Optional
 
+from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
-from passlib.context import CryptContext
 
-from thoughts.optional import optional
 from thoughts.as_form import as_form
+from thoughts.optional import optional
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class UserBase(SQLModel, table=False):
     username: str
-    full_name: str
+    full_name: Optional[str]
     email: str
     disabled: bool
 
