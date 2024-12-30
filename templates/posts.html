@@ -4,8 +4,13 @@
 {% for post in posts.__root__ %}
     {% include 'post_item.html' %}
 {% endfor %}
-<li hx-get="{{ config.root }}/posts/?page={{ page + 1 }}&page_size={{ page_size }}" hx-target="#posts"
-    hx-swap="beforeend" hx-trigger="revealed"></li>
+{% if username %}
+    <li hx-get="{{ config.root }}/posts/{{username}}?page={{ page + 1 }}&page_size={{ page_size }}" hx-target="#posts"
+        hx-swap="beforeend" hx-trigger="revealed"></li>
+{% else %}
+    <li hx-get="{{ config.root }}/posts/?page={{ page + 1 }}&page_size={{ page_size }}" hx-target="#posts"
+        hx-swap="beforeend" hx-trigger="revealed"></li>
+{% endif %}
 {% if page == 1 %}
     </ul>
 {% endif %}

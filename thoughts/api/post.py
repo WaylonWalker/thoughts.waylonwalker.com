@@ -563,6 +563,7 @@ async def get_posts_by_user(
                 "page_size": page_size,
                 "page": page,
                 "current_user": current_user,
+                "username": username,
             },
         )
 
@@ -577,6 +578,7 @@ async def get_posts_by_user(
                 "is_logged_in": is_logged_in,
                 "page_size": page_size,
                 "page": page,
+                "username": username,
             },
         )
 
@@ -692,7 +694,11 @@ async def get_new_thought_modal(
     if current_user is None:
         return config.templates.TemplateResponse(
             "login_form.html",
-            {"request": request, "config": config, "error": "Please log in to create a new thought"},
+            {
+                "request": request,
+                "config": config,
+                "error": "Please log in to create a new thought",
+            },
         )
 
     return config.templates.TemplateResponse(
@@ -716,7 +722,11 @@ async def fetch_title(
     if current_user is None:
         return config.templates.TemplateResponse(
             "login_form.html",
-            {"request": request, "config": config, "error": "Please log in to fetch titles"},
+            {
+                "request": request,
+                "config": config,
+                "error": "Please log in to fetch titles",
+            },
         )
 
     if not url.startswith(("http://", "https://")):
